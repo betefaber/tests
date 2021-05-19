@@ -7,7 +7,7 @@ import requests
 import gevent
 
 from config import CONFIG
-from utils import Utils
+from common.utils import Utils
 
 LOGGER = Utils.create_logger("api")
 
