@@ -1,8 +1,6 @@
-from tests.base_test import BaseTest
+from common.base_test import BaseTest
 from dojot.api import DojotAPI as Api
 import json
-import random
-import time
 
 
 class TemplateTest(BaseTest):
