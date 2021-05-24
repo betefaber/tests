@@ -15,65 +15,36 @@ class X509Test(BaseTest):
     """
 
 
-    def createCertificate(self, jwt: str, templates: list):
-        template_ids = []
-        for template in templates:
-            rc, template_id = Api.create_template(jwt, json.dumps(template))
-            #self.assertTrue(isinstance(template_id, int), "Error on create template")
+    def createCertificate(self, jwt: str, csr: str):
+        rc, res = Api.create_certificate(jwt, json.dumps(csr))
+        return rc,res
 
-            template_ids.append(template_id["template"]["id"]) if rc == 200 else template_ids.append(None)
-        return template_ids
-
-    def createDevices(self, jwt: str, devices: list):
-        device_ids = []
-
-        for templates, label in devices:
-            self.logger.info('adding device ' + label + ' using templates ' + str(templates))
-            rc, device_id = Api.create_device(jwt, templates, label)
-            self.assertTrue(device_id is not None, "Error on create device")
-            device_ids.append(device_id) if rc == 200 else device_ids.append(None)
-
-        return device_ids
-
-    def createTemplateFail(self, jwt: str, template: str):  ##criado para não interferir no resultado do createTemplate, usado no append
-        rc, res = Api.create_template(jwt, json.dumps(template))
-
-        #return rc, res if rc != 200 else res
+    def updateCertificate(self, jwt: str, fingerprint: int, csr: str):
+        rc, res = Api.update_certificate(jwt, fingerprint, json.dumps(csr))
         return rc, res
 
-    def updateTemplate(self, jwt: str, tempĺate_id: int, template: str):
-        rc, res = Api.update_template(jwt, tempĺate_id, json.dumps(template))
-        #self.assertTrue(isinstance(template_id, int), "Error on update template")
+    def getCertificates(self, jwt: str):
+        rc, res = Api.get_certificates(jwt)
         return rc, res
 
-    def getTemplates(self, jwt: str):
-        rc, res = Api.get_templates(jwt)
-        #self.assertTrue(isinstance(template_id, int), "Error on get template")
+    def getCertificatesWithParameters(self, jwt: str, attrs: str):
+        rc, res = Api.get_certificates_with_parameters(jwt, attrs)
         return rc, res
 
-    def getTemplatesWithParameters(self, jwt: str, attrs: str):
-        rc, res = Api.get_templates_with_parameters(jwt, attrs)
-        # self.assertTrue(isinstance(template_id, int), "Error on get template")
+    def getCertificate(self, jwt: str, fingerprint: str):
+        rc, res = Api.get_certificate(jwt, fingerprint)
         return rc, res
 
-    def getTemplate(self, jwt: str, template_id: int):
-        rc, res = Api.get_template(jwt, template_id)
-        #self.assertTrue(isinstance(template_id, int), "Error on get template")
+    def getCertificateWithParameters(self, jwt: str, fingerprint: int, attrs: str):
+        rc, res = Api.get_template_with_parameters(jwt, fingerprint, attrs)
         return rc, res
 
-    def getTemplateWithParameters(self, jwt: str, template_id: int, attrs: str):
-        rc, res = Api.get_template_with_parameters(jwt, template_id, attrs)
-        # self.assertTrue(isinstance(template_id, int), "Error on get template")
+    def deleteCertificates(self, jwt: str):
+        rc, res = Api.delete_certificates(jwt)
         return rc, res
 
-    def deleteTemplates(self, jwt: str):
-        rc, res = Api.delete_templates(jwt)
-        #self.assertTrue(isinstance(template_id, int), "Error on delete template")
-        return rc, res
-
-    def deleteTemplate(self, jwt: str, template_id: int):
-        rc, res = Api.delete_template(jwt, template_id)
-        #self.assertTrue(isinstance(template_id, int), "Error on delete template")
+    def deleteCertificate(self, jwt: str, fingerprint: int):
+        rc, res = Api.delete_template(jwt, fingerprint)
         return rc, res
 
 
@@ -82,209 +53,23 @@ class X509Test(BaseTest):
         self.logger.debug('getting jwt...')
         jwt = Api.get_jwt()
 
-        templates = []
-        self.logger.debug('creating certificates...')
-        templates.append({
-            "label": "TiposAtributos",
-            "attrs": [
-                {
-                    "label": "float",
-                    "type": "dynamic",
-                    "value_type": "float"
-                },
-                {
-                    "label": "int",
-                    "type": "dynamic",
-                    "value_type": "integer"
-                },
-                {
-                    "label": "text",
-                    "type": "dynamic",
-                    "value_type": "string"
-                },
-                {
-                    "label": "gps",
-                    "type": "dynamic",
-                    "value_type": "geo:point",
-                    "metadata": [
-                        {
-                            "label": "descricao",
-                            "type": "static",
-                            "value_type": "string",
-                            "static_value": "localizacao do device"
-                        }
-                    ]
-                },
-                {
-                    "label": "bool",
-                    "type": "dynamic",
-                    "value_type": "bool"
-                },
-                {
-                    "label": "mensagem",
-                    "type": "actuator",
-                    "value_type": "string"
-                },
-                {
-                    "label": "serial",
-                    "type": "static",
-                    "value_type": "string",
-                    "static_value": "indefinido"
-                },
-                {
-                    "label": "objeto",
-                    "type": "dynamic",
-                    "value_type": "object"
-                }
-                ]
-        })
-        templates.append({
-            "label": "Vazio",
-            "attrs": []
-        })
-        templates.append({
-            "label": "SensorModel",
-            "attrs": [
-                {
-                    "label": "temperature",
-                    "type": "dynamic",
-                    "value_type": "float"
-                },
-                {
-                    "label": "model-id",
-                    "type": "static",
-                    "value_type": "string",
-                    "static_value": "model-001"
-                }
-                ]
-        })
-        templates.append({
-            "label": "valores estaticos vazios",
-            "attrs": [
-                {
-                    "label": "SerialNumber",
-                    "type": "static",
-                    "value_type": "string",
-                    "static_value": ""
-                },
-                {
-                    "label": "location",
-                    "static_value": "",
-                    "type": "static",
-                    "value_type": "geo:point"
-                }
-                ]
-        })
-        templates.append({
-            "label": "firmware_update",
-            "attrs": [
-                {
-                    "label": "transferred_version",
-                    "type": "actuator",
-                    "value_type": "string",
-                    "metadata": [
-                        {
-                            "label": "dojot:firmware_update:desired_version",
-                            "type": "static",
-                            "value_type": "boolean",
-                            "static_value": True
-                        },
-                        {
-                            "label": "path",
-                            "type": "lwm2m",
-                            "static_value": "/5/0/1",
-                            "value_type": "string"
-                        }
-                    ]
-                },
-                {
-                    "label": "image_state",
-                    "type": "dynamic",
-                    "value_type": "integer",
-                    "metadata": [
-                        {
-                            "label": "dojot:firmware_update:state",
-                            "type": "static",
-                            "value_type": "boolean",
-                            "static_value": True
-                        },
-                        {
-                            "type": "lwm2m",
-                            "label": "path",
-                            "static_value": "/5/0/3",
-                            "value_type": "string"
-                        }
-                    ]
-                },
-                {
-                    "label": "update_result",
-                    "type": "dynamic",
-                    "value_type": "integer",
-                    "metadata": [
-                        {
-                            "label": "dojot:firmware_update:update_result",
-                            "type": "static",
-                            "value_type": "boolean",
-                            "static_value": True
-                        },
-                        {
-                            "type": "lwm2m",
-                            "label": "path",
-                            "static_value": "/5/0/5",
-                            "value_type": "string"
-                        }
-                    ]
-                },
-                {
-                    "label": "apply_image",
-                    "type": "actuator",
-                    "value_type": "string",
-                    "metadata": [
-                        {
-                            "label": "dojot:firmware_update:update",
-                            "type": "static",
-                            "value_type": "boolean",
-                            "static_value": True
-                        },
-                        {
-                            "type": "lwm2m",
-                            "label": "path",
-                            "static_value": "/5/0/2",
-                            "value_type": "string"
-                        },
-                        {
-                            "type": "lwm2m",
-                            "label": "operations",
-                            "static_value": "e",
-                            "value_type": "string"
-                        }
-                    ]
-                },
-                {
-                    "label": "current_version",
-                    "type": "dynamic",
-                    "value_type": "string",
-                    "metadata": [
-                        {
-                            "label": "dojot:firmware_update:version",
-                            "type": "static",
-                            "value_type": "boolean",
-                            "static_value": True
-                        },
-                        {
-                            "type": "lwm2m",
-                            "label": "path",
-                            "static_value": "/3/0/3",
-                            "value_type": "string"
-                        }
-                    ]
-                }
-            ]
-        })
+        self.logger.debug('listing certificates - no data...')
+        rc, res = self.getCertificates(jwt)
+        self.logger.debug('Certificates: ' + str(res))
+        self.assertTrue(int(rc) == 200, "codigo inesperado")
+
+        
+        self.logger.debug('creating certificate...')
+        template = {
+            "csr": "-----BEGIN CERTIFICATE REQUEST-----\r\nMIICVjCCAT4CAQAwETEPMA0GA1UEAwwGMzMzMjNmMIIBIjANBgkqhkiG9w0BAQEF\r\nAAOCAQ8AMIIBCgKCAQEA1kfX53IJUArqIuZOr9IYTsVawDn4D+YASe1ZwS1dbxyi\r\nit5rI5IwF2NZYy2xOwrq2DqcFVTouL00hrT8sXAegSMyB0NcdRKDvOUDtjD6cn9L\r\nj3vl7wB3SzTRzOGLoq6Q5WKHryJKPDvijAx7je7VxbryfE+a6MKRlMOcqyqPpD0+\r\nn5Hd8IeGNh3PTFbbeaIgsE4n2dkjLaCQRgZR2JnSDpC2Tcx51yoFFvvxrvZo4tRc\r\npZTVnA1w+VmRv2arRPPDxV8QXXLFywwQzYSxTcdWjR8fptBIquEUYXU+TXkHRu8/\r\nekBJbqm52VR2usSCSFeDH3wh873ZShfRp1dMCNoBbQIDAQABoAAwDQYJKoZIhvcN\r\nAQELBQADggEBACOe6ON7dL18wwFcxnFjF0sUBdzwQDPScL6LQLuIz0pjCRo9qT7V\r\niT4b43PZ7xGg6IdCqibqQ+6tNeyFhq6tWcQgfQhrMwyfA54osu20tLhnXC2g6W3x\r\nc/31AU2byvVEvqITX3VDu7c4nlSRptqVvDO8I1De+3HlXWK42ohi1UWwXLej2cVk\r\niYlCMmQOzKfgTzLuwQnBPRJUiIVon1j/i3ZO4baVNdledS1RMqyVG4ilJlUVqud/\r\neD0zI1YUPE2YizxYI+8L3k7sze/nDGhtX021HMGSEpVq8NKaPapylK0X+tn7YY0Z\r\nuY22UoTwLUy+sX8lctzGT571iODCEEEfC+c=\r\n-----END CERTIFICATE REQUEST-----"
+        }
 
 
-        template_ids = self.createTemplates(jwt, templates)
-        self.logger.info("templates ids: " + str(template_ids))
+        rc, res = self.createCertificate(jwt, template)
+        self.logger.info("certificate: " + str(res))
+        self.assertTrue(int(rc) == 201, "codigo inesperado")
+
+        """
 
         self.logger.debug('updating template SensorModel......')
         template = {
@@ -317,9 +102,12 @@ class X509Test(BaseTest):
         rc, res = self.getTemplate(jwt, template_ids[2])
         self.logger.debug('Template: ' + str(res))
         self.assertTrue(int(rc) == 200, "codigo inesperado")
+        
+        """
 
         """
         Lista templates
+        """
         """
 
         self.logger.info('listing all templates...')
@@ -401,9 +189,11 @@ class X509Test(BaseTest):
         rc, res = self.getTemplatesWithParameters(jwt, "parametro=outro")
         self.logger.debug('Templates: ' + str(res))
         self.assertTrue(int(rc) == 200, "codigo inesperado")
+        """
 
         """
         Lista template especifico
+        """
         """
 
         self.logger.info('listing specific template...' + str(template_ids[2]))
@@ -416,9 +206,11 @@ class X509Test(BaseTest):
         rc, res = self.getTemplateWithParameters(jwt, template_ids[2], "attr_format=both")
         self.logger.debug('Template info: ' + str(res))
         self.assertTrue(int(rc) == 200, "codigo inesperado")
+        """
 
         """
         attr_format: issue #1967
+        """
         """
 
         self.logger.info('listing specific template with parameter: attr_format=single...')  # single: só attrs
@@ -427,7 +219,9 @@ class X509Test(BaseTest):
         self.assertTrue(int(rc) == 200, "codigo inesperado")
 
         """
+        """
         attr_format: issue #1967
+        """
         """
 
         self.logger.info('listing specific template with parameter: attr_format=split...')  # split: só data_attrs
@@ -436,7 +230,9 @@ class X509Test(BaseTest):
         self.assertTrue(int(rc) == 200, "codigo inesperado")
 
         """
+        """
         Remove template especifico
+        """
         """
 
         self.logger.info('removing specific template...')
@@ -458,12 +254,15 @@ class X509Test(BaseTest):
 
 
         """
+        """
         Remove all templates
+        """
         """
 
         ##só remove se não existir devices associados
 
         Api.delete_devices(jwt)
+        """
         """
 
         self.logger.info('removing all templates...')
@@ -475,6 +274,45 @@ class X509Test(BaseTest):
 
         """
         Fluxos Alternativos
+        """
+
+        #TODO: erro 400 ("A message describing the cause of the error")
+
+        self.logger.debug('creating certificate - csr inválido (device não existe)...') # ainda não tem validação, o certificado é criado
+        template = {
+            "csr": "-----BEGIN CERTIFICATE REQUEST-----\r\nMIICVjCCAT4CAQAwETEPMA0GA1UEAwwGMTIzYWJjMIIBIjANBgkqhkiG9w0BAQEF\r\nAAOCAQ8AMIIBCgKCAQEAu6O1KQWOmlfSuXmeMoyPWQwjCRrnrX/Iq/lueCRCafN4\r\ni37BxoVyBTOmYIdrwsxWI6bZ/em2helsPcIs+w0JIV2YAqWYlJT0h1r0kZIrmG7l\r\nNXDxSZ1+iZrUhEItSVnAy0Pu5klBmV0cRtfoHvpmFEUNDRk1LwxrlgirLYUAGibf\r\nUz+OvLOgjlMm62/01dbskVxIrEyIeQItTlvfbnKwSMRfVzv7lMmewTrqVAU8ygJo\r\n6HG49QBo6EAUsSkgGsn+HiOMJc/WIa1SnSuFtAOI4X2xFyVvWnuALHuMHcQ+j1ZU\r\nhDXhkYqyt5g9FwJGRxzzs64LqE4QIqbaBSVCw1cOsQIDAQABoAAwDQYJKoZIhvcN\r\nAQELBQADggEBAH/j0kylaxvvqLGOAXdxS93sFMVN3J/37yf/ZcI8uWecuEO0sJh6\r\nArXQCJo7w0K4SX3IYV9x76NrTDoxC6cwLy1Jz8RzfHpPr2eWaqrV1IF31rGhs4iu\r\n5oeUQmtN9WdBepfrosbNXz15+eRmBDv8gaTT6U0WuY8GhJcBr9hMGU27YXhVbFDR\r\n9BJSKgt2rrKsmrg/d+uufKMPuTzErv/731wKD0mYXjuRaHkUi/34RylsJbzUpENc\r\n76m697la47TjmZAq/Cs4If57LHXCSdJe+ox619k3LHJUXJwfbC4yQTmr2OLagV7j\r\nv2G7zCntFPTw31EHwQ0YtUVEhxkOUlE7Bfc=\r\n-----END CERTIFICATE REQUEST-----"
+        }
+        rc, res = self.createCertificate(jwt, template)
+        self.logger.info("certificate: " + str(res))
+        self.assertTrue(int(rc) == 201, "codigo inesperado")
+
+        self.logger.debug('creating certificate - csr vazio...')
+        template = {
+            "csr": ""
+        }
+        rc, res = self.createCertificate(jwt, template)
+        self.logger.info("Result: " + str(res))
+        self.assertTrue(int(rc) == 400, "codigo inesperado")
+
+        self.logger.debug('creating certificate - csr adulterado...')
+        template = {
+            "csr": "-----BEGIN CERTIFICATE REQUEST-----\r\nMIICVjCCAT4CAQAwETEPMA0GA1UEAwwGNWEzMmViMIIBIjANBgkqhkiG9w0BAQEF\r\nAAOCAQ8AMIIBCgKCAQEAzKQh4Y4E3t8byxNAsWMuztPjNcvsOCC8GwFeexmFSlpS\r\nugcLqx7j4h+7rjeZvPKfV5fBd73jUh2kj8AzoR5UilNUIgXl38ry+dEuSotSB8lS\r\nICUgWEvWkuJNCBjZBpzlfp1xRPyS96fr6sGPuISVCxIHheeyYVLApeEGtQWOymwm\r\nItAAOTJyPaddfv4fvmvurNHK8hOPauiu2eCDJiQQaFQsCnNbx9Q1QozNee5Ln6ZG\r\nwcCgy0k7g43YRnARNGnffKvJuSsbbUxW7ZHJKTLFPz8mb2cPFtHJqJovEojoaKR4\r\nsHjklsHi5kKzprf/OBztKr+4s9g19hvYOKxWg1ajdwIDAQABoAAwDQYJKoZIhvcN\r\nAQELBQADggEBACK04o5DRVPbvaFLQn4Grhir2drtqBVjtPNDDu8bs9fsXqlnTJKo\r\n8XN9yO53qDc6LDYT6qsRzXk9o2YsARkA+i/KSJSdEdgev5wYaG4nHS55xy/BNMLX\r\n+hSY52JiTGH582fwXbGARucogPsaqeq0bHhEATwvDqEEAeqogmNGTaRc6zGtPfu7\r\n5GyBgQfpBRv1daI8k883Q5sbLTXTqWip/HwgLxY21z+ife6fZe076xpdyIUw5E8B\r\nN9IGKczrFV6JoTpKSEhXhppxS6BmNC18+XeCMBuwK9LJs5Jkwy4DnPOgWjPvQzi8\r\nXUix95xsh0nQ/pOqoq/M5wM4JzuLaLABCW4=\r\n-----END CERTIFICATE REQUEST-----"
+        }
+        rc, res = self.createCertificate(jwt, template)
+        self.logger.info("Result: " + str(res))
+        self.assertTrue(int(rc) == 500, "codigo inesperado") #erro esperado: 400
+
+        self.logger.debug('creating certificate - no body...')
+        template = {}
+        rc, res = self.createCertificate(jwt, template)
+        self.logger.info("Result: " + str(res))
+        self.assertTrue(int(rc) == 400, "codigo inesperado")
+        resposta_esperada = "{\"schema$id\":\"http://www.dojot.com.br/schemas/reg-or-gen-cert\",\"schemaErrors\":[{\"keyword\":\"required\",\"dataPath\":\"\",\"schemaPath\":\"#/oneOf/0/required\",\"params\":{\"missingProperty\":\"certificatePem\"},\"message\":\"should have required property 'certificatePem'\"},{\"keyword\":\"required\",\"dataPath\":\"\",\"schemaPath\":\"#/oneOf/1/required\",\"params\":{\"missingProperty\":\"csr\"},\"message\":\"should have required property 'csr'\"},{\"keyword\":\"oneOf\",\"dataPath\":\"\",\"schemaPath\":\"#/oneOf\",\"params\":{\"passingSchemas\":null},\"message\":\"should match exactly one schema in oneOf\"}]}"
+        self.logger.info("Resultado esperado: " + str(resposta_esperada))
+        #self.assertTrue(res == resposta_esperada, "resposta inesperada")
+
+
+
         """
 
         self.logger.info('creating template sem label...')
@@ -556,4 +394,5 @@ class X509Test(BaseTest):
         rc, res = self.deleteTemplate(jwt, 1000)
         self.logger.info('Result: ' + str(res))
         self.assertTrue(int(rc) == 404, "codigo inesperado")
+        """
 
