@@ -1,8 +1,6 @@
-from tests.base_test import BaseTest
+from common.base_test import BaseTest
 from dojot.api import DojotAPI as Api
 import json
-import random
-import time
 
 
 class TemplateTest(BaseTest):
@@ -83,6 +81,11 @@ class TemplateTest(BaseTest):
         self.logger.info('Executing template test')
         self.logger.debug('getting jwt...')
         jwt = Api.get_jwt()
+
+        self.logger.info('listing all templates - no data...')
+        rc, res = self.getTemplates(jwt)
+        self.logger.debug('Template List: ' + str(res))
+        self.assertTrue(int(rc) == 200, "codigo inesperado")
 
         templates = []
         self.logger.debug('creating templates...')
@@ -325,8 +328,8 @@ class TemplateTest(BaseTest):
         """
 
         self.logger.info('listing all templates...')
-        rc, list = self.getTemplates(jwt)
-        self.logger.debug('Template List: ' + str(list))
+        rc, res = self.getTemplates(jwt)
+        self.logger.debug('Template List: ' + str(res))
         self.assertTrue(int(rc) == 200, "codigo inesperado")
 
         self.logger.info('listing templates with parameter: page_size...')

@@ -1,4 +1,4 @@
-from tests.base_test import BaseTest
+from common.base_test import BaseTest
 from dojot.api import DojotAPI as Api
 from mqtt.mqttClient import MQTTClient
 import json

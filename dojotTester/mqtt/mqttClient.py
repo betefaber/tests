@@ -1,6 +1,6 @@
 import paho.mqtt.client as mqtt
 from config import CONFIG
-from utils import Utils
+from common.utils import Utils
 import json
 
 LOGGER = Utils.create_logger("mqtt_client")

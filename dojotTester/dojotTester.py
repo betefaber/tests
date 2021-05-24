@@ -4,7 +4,7 @@ This script is the entry point for running tests
 """
 import argparse
 import os
-from utils import Utils
+from common.utils import Utils
 
 import fnmatch
 import importlib
