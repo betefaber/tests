@@ -734,6 +734,390 @@ class DojotAPI:
         return result_code, res
 
     @staticmethod
+    def get_certificates(jwt: str) -> tuple:
+        """
+        Retrieves all certificates in Dojot.
+
+        Parameters:
+            jwt: JWT authorization.
+
+        Returns the certificates or a error message.
+        """
+        LOGGER.debug("Listing all certificates...")
+
+        args = {
+            "url": "{0}/x509/v1/certificates".format(CONFIG['dojot']['url']),
+            "headers": {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer {0}".format(jwt),
+            }
+        }
+
+        result_code, res = DojotAPI.call_api(requests.get, args)
+
+        LOGGER.debug("... retrieved certificates")
+        return result_code, res
+
+    @staticmethod
+    def get_certificates_with_parameters(jwt: str, attrs: str) -> tuple:
+        """
+
+        Parameters:
+            jwt: Dojot JWT token
+            attrs: optional parameters
+
+            """
+        LOGGER.debug("Retrieving certificates with parameters...")
+
+        args = {
+            "url": "{0}/x509/v1/certificates?{1}".format(CONFIG['dojot']['url'], attrs),
+            "headers": {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer {0}".format(jwt),
+            }
+        }
+
+        result_code, res = DojotAPI.call_api(requests.get, args)
+
+        LOGGER.debug("... retrieved certificates with parameters")
+
+        return result_code, res
+
+    @staticmethod
+    def get_certificate(jwt: str, fingerprint: str) -> tuple:
+        """
+        Retrieves all certificates in Dojot.
+
+        Parameters:
+            jwt: JWT authorization.
+
+        Returns the certificates or a error message.
+        """
+        LOGGER.debug("Listing specific certificate...")
+
+        args = {
+            "url": "{0}/x509/v1/certificates/{1}".format(CONFIG['dojot']['url'], fingerprint),
+            "headers": {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer {0}".format(jwt),
+            }
+        }
+
+        result_code, res = DojotAPI.call_api(requests.get, args)
+
+        LOGGER.debug("... retrieved certificate")
+        return result_code, res
+
+    @staticmethod
+    def get_certificate_with_parameters(jwt: str, fingerprint: str, attrs: str) -> tuple:
+        """
+
+        Parameters:
+            jwt: Dojot JWT token
+            attrs: optional parameters
+
+            """
+        LOGGER.debug("Retrieving certificate with parameters...")
+
+        args = {
+            "url": "{0}/x509/v1/certificates/{1}?{2}".format(CONFIG['dojot']['url'], fingerprint, attrs),
+            "headers": {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer {0}".format(jwt),
+            }
+        }
+
+        result_code, res = DojotAPI.call_api(requests.get, args)
+
+        LOGGER.debug("... retrieved certificate with parameters")
+
+        return result_code, res
+
+    @staticmethod
+    def create_certificate(jwt: str, data=dict) -> str: #tuple:
+        """
+        Create the device certificate
+
+        Returns the fingerprint or a error message.
+        """
+        LOGGER.debug("Creating certificate...")
+
+        if isinstance(data, dict):
+            data = json.dumps(data)
+
+        args = {
+            "url": "{0}/x509/v1/certificates".format(CONFIG['dojot']['url']),
+            "headers": {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer {0}".format(jwt),
+            },
+            "data": data,
+        }
+
+        result_code, res = DojotAPI.call_api(requests.post, args)
+
+        LOGGER.debug("... created the certificate")
+
+        return result_code, res
+
+    @staticmethod
+    def delete_certificates(jwt: str) -> tuple:
+        """
+        Delete all certificates.
+        """
+        LOGGER.debug("Deleting certificates...")
+
+        args = {
+            "url": "{0}/x509/v1/certificates".format(CONFIG['dojot']['url']),
+            "headers": {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer {0}".format(jwt),
+            }
+        }
+
+        result_code, res = DojotAPI.call_api(requests.delete, args)
+
+        LOGGER.debug("... deleted certificates")
+        return result_code, res
+
+    @staticmethod
+    def delete_certificate(jwt: str, fingerprint: str) -> tuple:
+        """
+        Delete certificate.
+        """
+        LOGGER.debug("Deleting certificate...")
+
+        args = {
+            "url": "{0}/x509/v1/certificates/{1}".format(CONFIG['dojot']['url'], str(fingerprint)),
+            "headers": {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer {0}".format(jwt),
+            }
+        }
+
+        result_code, res = DojotAPI.call_api(requests.delete, args)
+
+        LOGGER.debug("... deleted certificate")
+        return result_code, res
+
+
+    @staticmethod
+    def associate_certificate(jwt: str, fingerprint: str, device_id: str) -> tuple:
+        """
+
+        Returns the updated device ID or a error message.
+        """
+        LOGGER.debug("Associating certificate...")
+
+        data = json.dumps({
+            "belongsTo": {
+                "device": device_id
+            }
+        })
+
+
+        args = {
+            "url": "{0}/x509/v1/certificates/{1}".format(CONFIG['dojot']['url'], fingerprint),
+            "headers": {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer {0}".format(jwt),
+            },
+            "data": data
+        }
+
+        result_code, res = DojotAPI.call_api(requests.patch, args)
+
+        LOGGER.debug("... associated certificate")
+        return result_code, res
+
+    @staticmethod
+    def get_fingerprint(jwt: str, indice: int) -> tuple:
+
+        """
+        Retrieves the fingerprint.
+
+        Parameters:
+            jwt: Dojot JWT token
+            data: result of get specific certificate
+
+
+        Returns fingerprint or None.
+        """
+
+
+        LOGGER.debug("Retrieving fingerprint...")
+
+        args = {
+            "url": "{0}/x509/v1/certificates".format(CONFIG['dojot']['url']),
+            "headers": {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer {0}".format(jwt),
+            }
+        }
+
+        result_code, res = DojotAPI.call_api(requests.get, args)
+
+        fingerprint = res['certificates'][indice]['fingerprint']
+
+        LOGGER.debug("... retrieved the fingerprint")
+
+        return result_code, fingerprint
+
+    @staticmethod
+    def get_ca(jwt: str) -> tuple:
+        """
+        Retrieves root CA in Dojot.
+
+        Parameters:
+            jwt: JWT authorization.
+
+        Returns the certificate or a error message.
+        """
+        LOGGER.debug("Listing root CA ...")
+
+        args = {
+            "url": "{0}/x509/v1/ca".format(CONFIG['dojot']['url']),
+            "headers": {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer {0}".format(jwt),
+            }
+        }
+
+        result_code, res = DojotAPI.call_api(requests.get, args)
+
+        LOGGER.debug("... done")
+        return result_code, res
+
+    @staticmethod
+    def get_crl(jwt: str) -> tuple:
+        """
+        Retrieves latest CRL.
+
+        Parameters:
+            jwt: JWT authorization.
+
+        Returns the certificate or a error message.
+        """
+        LOGGER.debug("Listing latest CRL ...")
+
+        args = {
+            "url": "{0}/x509/v1/ca/crl".format(CONFIG['dojot']['url']),
+            "headers": {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer {0}".format(jwt),
+            }
+        }
+
+        result_code, res = DojotAPI.call_api(requests.get, args)
+
+        LOGGER.debug("... done")
+        return result_code, res
+
+    @staticmethod
+    def register_trusted_ca(jwt: str, ca_pem: str, allow_auto_registration: bool) -> tuple:
+        """
+        Registers a trusted CA certificate
+
+        Returns the fingerprint or a error message.
+        """
+        LOGGER.debug("Registering a trusted CA certificate...")
+
+        data = {
+            "caPem": ca_pem,
+            "allowAutoRegistration": allow_auto_registration
+        }
+
+        args = {
+            "url": "{0}/x509/v1/trusted-cas".format(CONFIG['dojot']['url']),
+            "headers": {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer {0}".format(jwt),
+            },
+            "data": json.dumps(data),
+        }
+
+        result_code, res = DojotAPI.call_api(requests.post, args)
+
+        LOGGER.debug("... registered certificate")
+        return result_code, res
+
+    @staticmethod
+    def delete_trusted_ca(jwt: str, caFingerprint: str) -> tuple:
+        """
+        Remove a trusted CA certificate
+
+        """
+        LOGGER.debug("Removing a trusted CA certificate...")
+
+        args = {
+            "url": "{0}/x509/v1/trusted-cas/{1}".format(CONFIG['dojot']['url'], caFingerprint),
+            "headers": {
+                "Authorization": "Bearer {0}".format(jwt),
+            }
+        }
+
+        result_code, res = DojotAPI.call_api(requests.delete, args)
+
+        LOGGER.debug("... done")
+        return result_code, res
+
+    @staticmethod
+    def get_trusted_cas(jwt: str) -> tuple:
+        """
+        Listing a trusted CA certificates
+
+        """
+        LOGGER.debug("Listing a trusted CA certificates...")
+
+        args = {
+            "url": "{0}/x509/v1/trusted-cas".format(CONFIG['dojot']['url']),
+            "headers": {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer {0}".format(jwt),
+            }
+        }
+
+        result_code, res = DojotAPI.call_api(requests.get, args)
+
+        LOGGER.debug("... done")
+        return result_code, res
+
+
+    @staticmethod
+    def create_remote_node(jwt: str, data=dict) -> tuple:
+        """
+        Create a remote node in Dojot.
+
+        Parameters:
+            jwt: JWT authorization.
+
+
+
+        Returns the created remote node
+        """
+        LOGGER.debug("Creating remote node...")
+
+        if isinstance(data, dict):
+            data = json.dumps(data)
+
+        args = {
+            "url": "{0}/flows/v1/node".format(CONFIG['dojot']['url']),
+            "headers": {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer {0}".format(jwt),
+            },
+            "data": data,
+        }
+
+        result_code, res = DojotAPI.call_api(requests.post, args)
+
+        LOGGER.debug("... remote node created")
+        return result_code, res
+
+
+
+
+    @staticmethod
     def divide_loads(total: int, batch: int) -> List:
         """
         Divides `n` in a list with each element being up to `batch`.
