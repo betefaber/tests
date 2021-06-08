@@ -4,6 +4,8 @@ from mqtt.mqttClient import MQTTClient
 import json
 import random
 import time
+from common.testutils import *
+
 
 class SanityTest(BaseTest):
     """
@@ -79,8 +81,7 @@ class SanityTest(BaseTest):
                     "metadata": [{"label": "unidade", "type": "meta", "value_type": "string", "static_value": "°C"}]
                 }
             ]
-        }
-        )
+        })
         templates.append({
             "label": "medidor de pressao",
             "attrs": [
@@ -2691,22 +2692,45 @@ class SanityTest(BaseTest):
         self.logger.info("publicando com dispositivo: " + dev1_id)
         dev1.publish(dev1_topic,
                      {"gps":"-22.890970, -47.063006","velocidade":50,"passageiros":30,"operacional":False})
-        time.sleep(1)
+        time.sleep(8)  # waiting for flow
+        # check publication in history
+        rc, res = get_history_last_attr(self, jwt, dev1_id, "velocidade")
+        self.assertTrue(rc == 200, "** FAILED ASSERTION: received an unexpected result code: " + str(rc) + " **")
+        self.assertTrue(res["value"] == 50, "** FAILED ASSERTION: received an unexpected message: " +
+                        str(res["value"]) + " **")
+        # check flow result
+        rc, res = get_history_last_attr(self, jwt, dev1_id, "letreiro")
+        self.assertTrue(rc == 200, "** FAILED ASSERTION: received an unexpected result code: " + str(rc) + " **")
+        self.assertTrue(res["value"] == "JARDIM PAULISTA", "** FAILED ASSERTION: received an unexpected message: " +
+                        res["value"] + " **")
+
+        rc, res = get_history_last_attr(self, jwt, dev1_id, "mensagem")
+        self.assertTrue(rc == 200, "** FAILED ASSERTION: received an unexpected result code: " + str(rc) + " **")
+        self.assertTrue(res["value"] == "Não está no Cambuí", "** FAILED ASSERTION: received an unexpected message: " +
+                        res["value"] + " **")
+
         dev1.publish(dev1_topic,
                      {"gps":"-22.893619, -47.052921","velocidade":40,"passageiros":45,"operacional":True})
-        time.sleep(5)
+        time.sleep(8)
+        rc, res = get_history_last_attr(self, jwt, dev1_id, "letreiro")
+        self.assertTrue(rc == 200, "** FAILED ASSERTION: received an unexpected result code **")
+        self.assertTrue(res["value"] == "LOTADO", "** FAILED ASSERTION: received an unexpected message: " +
+                        res["value"] + " **")
 
+        rc, res = get_history_last_attr(self, jwt, dev1_id, "mensagem")
+        self.assertTrue(rc == 200, "** FAILED ASSERTION: received an unexpected result code: " + str(rc) + " **")
+        self.assertTrue(res["value"] == "Está no Cambuí", "** FAILED ASSERTION: received an unexpected message: " +
+                        res["value"] + " **")
+
+        rc, count = get_history_count_attr_value(self, jwt, dev1_id, "letreiro", "LOTADO")
+        self.assertTrue(count == 1, "** FAILED ASSERTION: received an unexpected count **")
+
+        # Device 2 - dispositivo
         dev2_id = Api.get_deviceid_by_label(jwt, "dispositivo")
         dev2_topic = "admin:" + dev2_id + "/attrs"
         dev2 = MQTTClient(dev2_id)
         self.logger.info("publicando com dispositivo: " + dev2_id)
         dev2.publish(dev2_topic, {"int": 2})
-
-        ## TODO: obter histórico do dev1_id
-
-        Api.get_history_device(jwt,dev1_id)
-
-        time.sleep(1)
 
         ## TODO: obter histórico do dev2_id
 
