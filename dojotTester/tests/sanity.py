@@ -58,8 +58,11 @@ class SanityTest(BaseTest):
 
         Api.create_user(jwt, user)
 
+    def createRemoteNode(self, jwt: str, node: dict):
 
-
+        rc, res = Api.create_remote_node(jwt, node)
+        #self.assertTrue(int(rc) == 200, "Error on create remote node")
+        return rc, res
 
 
     def runTest(self):
@@ -889,8 +892,10 @@ class SanityTest(BaseTest):
             }
         )
 
-        #TODO: Adicionar o no remoto kelvin
-        ##
+        #Adicionar o no remoto kelvin
+
+        self.createRemoteNode(jwt, {"image": "dojot/kelvin-example:3.0.0-alpha2", "id": "kelvin"})
+
 
 
         flows.append({
@@ -2803,14 +2808,13 @@ class SanityTest(BaseTest):
 
         time.sleep(2)
 
-        """
-
         dev_id = Api.get_deviceid_by_label(jwt, "Camera1")
         dev_topic = "admin:" + dev_id + "/attrs"
         dev = MQTTClient(dev_id)
         self.logger.info("publicando com dispositivo: " + dev_id)
-        dev.publish(dev_topic, {})
-        # mosquitto_pub -h ${HOST_MQTT} -p ${PORT_MQTT} -t ${tenant}:${id_device}/attrs -u ${tenant}:${id_device}  -f  ./arquivo.jpg.txt 2>/dev/null
+        file_t = open("/l/disk0/efaber/dojot-github/tests/dojotTester/arquivo.jpg.txt", 'rb')
+        blob_data = bytearray(file_t.read())
+        dev.publish(dev_topic, blob_data)
 
         time.sleep(10)
         
@@ -2818,11 +2822,12 @@ class SanityTest(BaseTest):
         dev_topic = "admin:" + dev_id + "/attrs"
         dev = MQTTClient(dev_id)
         self.logger.info("publicando com dispositivo: " + dev_id)
-        dev.publish(dev_topic, {})
-        # mosquitto_pub -h ${HOST_MQTT} -p ${PORT_MQTT} -t ${tenant}:${id_device}/attrs -u ${tenant}:${id_device}  -f  ./arquivo.jpg.qualcomm.txt 2>/dev/null
+        file_t = open("/l/disk0/efaber/dojot-github/tests/dojotTester/arquivo.jpg.qualcomm.txt", 'rb')
+        blob_data = bytearray(file_t.read())
+        dev.publish(dev_topic, blob_data)
 
         time.sleep(10)
-        """
+
 
         dev_id = Api.get_deviceid_by_label(jwt, "acesso")
         dev_topic = "admin:" + dev_id + "/attrs"
@@ -2858,10 +2863,17 @@ class SanityTest(BaseTest):
 
         # create device linha_4
         Api.create_device(jwt, [template_ids[5]], "linha_4")
+        self.logger.info('creating device linha_4...')
+        rc, res = Api.create_device(jwt, [template_ids[5]], "linha_4")
+        self.logger.info('Result: ' + str(res))
+        #self.assertTrue(int(rc) == 200, "codigo inesperado")
 
         # update device linha_4
+
         # delete device linha_4
-
-
-
+        device_id = Api.get_deviceid_by_label(jwt, "linha_4")
+        self.logger.info('removing device linha_4...')
+        rc, res = Api.delete_device(jwt, str(device_id))
+        self.logger.info('Result: ' + str(res))
+        #self.assertTrue(int(rc) == 200, "codigo inesperado")
 
