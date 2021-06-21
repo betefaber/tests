@@ -1,5 +1,4 @@
 const Flow = require("../../PageObject/Flow");
-const { seeFlowEventDevice } = require("../../PageObject/Flow");
 
 Feature('Flow CRUD');
 
@@ -149,7 +148,7 @@ Scenario('@flow: 2° FLOW', async(Flow, I) => {
     I.dragAndDrop(locate('.port_output').inside(`#${ids[1]}`), locate('.port_input').inside(`#${ids[2]}`));
     I.dragAndDrop(locate('.port_output').inside(`#${ids[2]}`), locate('.port_input').inside(`#${ids[3]}`));
 
-    //configurações
+    //config.
     I.click(`#${ids[0]}`);
     I.doubleClick(`#${ids[0]}`); 
     I.fillField('#node-input-name', 'Teste de nó')

@@ -57,7 +57,7 @@ async createTemplate(templateName = 'Template') {
 
     const templateId = template.template.id;
     return templateId;
-},
+ },
 
     clickOpen() {
         I.click(locate('a').withAttr({ href: '#/flows' }));

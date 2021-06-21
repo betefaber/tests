@@ -16,7 +16,7 @@ module.exports = () => {
             I.fillField('Username', 'admin');
             I.fillField('Password', 'admin');
             I.click('Login');
-            I.wait(10);
+            I.wait(3);
             if (clearDb) { I.clearDatabase(); }
             I.refreshPage();
         },

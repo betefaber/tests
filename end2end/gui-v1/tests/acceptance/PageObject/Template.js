@@ -124,6 +124,16 @@ module.exports = {
         });
     },
 
+    //FOI ADD [] EM attrValueType=[] para GUI v2
+    addAttrTwo(fieldValue, attrType, attrValueType=[], metaDataArray=[], value = '') {
+        this._clickOpenFooterBtnNew('New Attribute');
+        this._fillAttrForm(fieldValue, attrType, attrValueType, value);
+        this._metasArrayToAddUpdateRemove(metaDataArray);
+        within('.sidebar-attribute', () => {
+            I.click(this.ButtonLabel.add);
+        });
+    },
+
     _metasArrayToAddUpdateRemove(metaDataArray) {
         metaDataArray.forEach((meta) => {
             if (meta.oldLabelValue) {
@@ -271,6 +281,10 @@ module.exports = {
 
     clickSave() {
         I.click(this.ButtonLabel.save);
+    },
+
+    save(){
+        I.click('Save')
     },
 
     clickDiscard() {
