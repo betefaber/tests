@@ -11,6 +11,7 @@
     "test:basic": "./node_modules/.bin/codeceptjs --config=tests/acceptance/codecept.conf.js run --steps --grep @basic",
     "test:adv": "./node_modules/.bin/codeceptjs --config=tests/acceptance/codecept.conf.js run --steps --grep @adv",
     "test:flow": "./node_modules/.bin/codeceptjs --config=tests/acceptance/flow.conf.js run --steps --grep @flow",
+    "test:v2": "./node_modules/.bin/codeceptjs --config=tests/acceptance/v2.conf.js run --steps --grep @v2",
     "test:clearDb": "./node_modules/.bin/codeceptjs --config=tests/acceptance/custom.conf.js run --steps",
     "test:basic:clearDb": "./node_modules/.bin/codeceptjs --config=tests/acceptance/custom.conf.js run --steps  --grep @basic",
     "perfomaceTests": "tests/acceptance/performanceTests/runTest.sh",

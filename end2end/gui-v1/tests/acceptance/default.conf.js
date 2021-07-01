@@ -19,7 +19,8 @@ const config = {
             show: true,
             waitForNavigation: ['networkidle2', 'domcontentloaded'],
             chrome: {
-                args: ['--no-sandbox', '--start-maximized', '--start-fullscreen'],
+                    // '--lang=en-US,en' <-- Add (v2)
+                args: ['--lang=en-US,en','--no-sandbox', '--start-maximized', '--start-fullscreen'],
                 handleSIGTERM: false,
                 handleSIGHUP: false,
                 defaultViewport: {
@@ -28,8 +29,17 @@ const config = {
                 },
             },
         },
+
+        // add para gui v2
+        MyHelper: {
+            require: './getPageUr.js'
+          },
+
         REST: {
             endpoint: env.dojot_host,
+
+            //Para GUI v2
+            endpoint: env.dojot_host_v2,
         },
     },
     include: {

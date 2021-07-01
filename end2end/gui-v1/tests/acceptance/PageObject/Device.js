@@ -173,6 +173,16 @@ module.exports = {
         I.click(locate('a').withAttr({ href: `#/device/id/${deviceId}/detail` }));
     },
 
+    //ADD para GUI v2
+    clickDetailsDeviceDefault (){
+        I.click(locate('i').withAttr({ title: 'See details'}));
+    },
+
+    //ADD para GUI v2
+    clickDynamicAttributes(name){
+        I.click(locate('.col-label-body').find('div').withAttr({title: name}))
+    },
+
     selectAttr(attr) {
         I.click(locate('div').withAttr({ title: attr }));
     },
