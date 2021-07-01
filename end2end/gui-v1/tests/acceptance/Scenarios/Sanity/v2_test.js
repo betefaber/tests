@@ -4,13 +4,11 @@ const config = require ('../../default.conf')
 
 Feature ('v2 CRUD ')
 
-//OK
 Scenario('@v2: Login v1', async(I) => {
   I.amOnPage(env.dojot_host);
   I.loginAdmin(I, config.clearDb);
 })
 
-//OK 
 Scenario('@v2: Template', async (I, Template) => {
 Template.init(I);
 Template.clickOpenTemplatePage();
@@ -62,13 +60,12 @@ Scenario('@v2: Device integer', async (I, Device) => {
   Device.clickToSelectTemplate('v2');
   Device.clickBack();
   Device.clickSave();
-  //Device.checkExistCard('Create Device v2')
+  Device.checkExistCard('Create Device v2')
 });
 
-//OK
 Scenario('@v2: Publish integer', async (I, Device) => {
-  Device.init(I);
-  Device.checkExistCard('Create Device v2');
+  // Device.init(I);
+  // Device.checkExistCard('Create Device v2');
   Device.clickDetailsDeviceDefault();
   Device.clickDynamicAttributes('TEMP1');
   Device.clickDynamicAttributes('TEMP2');
@@ -76,16 +73,6 @@ Scenario('@v2: Publish integer', async (I, Device) => {
   Device.clickDynamicAttributes('GEO');
   Device.clickDynamicAttributes('GEO2');
 
-  const fullUrl = await I.getCurrentUrl()
-  const array1 = fullUrl.split("/device/id/");
-  const IdDevice = array1[1].replace("/detail",""); 
-
-  I.sendMQTTMessage(IdDevice, '{"TEMP1": "10"}',)
-  I.wait(2)
-})
-
-//OK
-Scenario('@v2: Publish integer 2', async (I, Device) => {
   const fullUrl = await I.getCurrentUrl()
   const array1 = fullUrl.split("/device/id/");
   const IdDevice = array1[1].replace("/detail",""); 
@@ -104,7 +91,26 @@ Scenario('@v2: Publish integer 2', async (I, Device) => {
   I.wait(5)
 })
 
-//OK
+// //OK
+// Scenario('@v2: Publish integer 2', async (I, Device) => {
+//   const fullUrl = await I.getCurrentUrl()
+//   const array1 = fullUrl.split("/device/id/");
+//   const IdDevice = array1[1].replace("/detail",""); 
+
+//   I.sendMQTTMessage(IdDevice, '{"TEMP1": "15"}',)
+//   I.sendMQTTMessage(IdDevice, '{"TEMP1": "22"}',)
+//   I.sendMQTTMessage(IdDevice, '{"TEMP1": "36"}',)
+//   I.sendMQTTMessage(IdDevice, '{"TEMP2": "10"}',)
+//   I.sendMQTTMessage(IdDevice, '{"TEMP2": "17"}',)
+//   I.sendMQTTMessage(IdDevice, '{"TEMP2": "30"}',)
+//   I.sendMQTTMessage(IdDevice, '{"TEMP3": "48"}',)
+//   I.sendMQTTMessage(IdDevice, '{"TEMP3": "44"}',)
+//   I.sendMQTTMessage(IdDevice, '{"TEMP3": "49"}',)
+//   I.sendMQTTMessage(IdDevice, '{"GEO": "-22.740490, -47.437186"}',)
+//   I.sendMQTTMessage(IdDevice, '{"GEO2": "-22.738734, -47.424335"}',)
+//   I.wait(5)
+// })
+
 Scenario('@v2: Login v2', async(I) => {
   await I.setEn()
   I.amOnPage(env.dojot_host_v2);
