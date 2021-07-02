@@ -1218,7 +1218,7 @@ class SanityTest(BaseTest):
                      "z": "81f229c7.c43d88",
                      "name": "",
                      "method": "PUT",
-                     "url": "ftp://10.202.71.7",
+                     "url": "ftp://10.50.4.31",
                      "username": "dojot",
                      "password": "dojot",
                      "filename": "data_filename",
@@ -1269,7 +1269,7 @@ class SanityTest(BaseTest):
                      "z": "81f229c7.c43d88",
                      "name": "",
                      "method": "PUT",
-                     "url": "ftp://10.202.71.7",
+                     "url": "ftp://10.50.4.31",
                      "username": "dojot",
                      "password": "dojot",
                      "filename": "image_filename",
@@ -1284,7 +1284,7 @@ class SanityTest(BaseTest):
                      "z": "81f229c7.c43d88",
                      "name": "",
                      "method": "PUT",
-                     "url": "ftp://192.168.0.38",
+                     "url": "ftp://localhost",
                      "username": "dojot",
                      "password": "dojot",
                      "filename": "image_filename",
@@ -1299,7 +1299,7 @@ class SanityTest(BaseTest):
                      "z": "81f229c7.c43d88",
                      "name": "",
                      "method": "PUT",
-                     "url": "ftp://192.168.0.38",
+                     "url": "ftp://localhost",
                      "username": "dojot",
                      "password": "dojot",
                      "filename": "data_filename",
@@ -2349,7 +2349,7 @@ class SanityTest(BaseTest):
                  "ret": "obj",
                  "body": "request",
                  "response": "resposta",
-                 "url": "http://192.168.0.38:8000/auth",
+                 "url": "http://10.50.4.33/auth",
                  "x": 326.5,
                  "y": 275,
                  "wires": [["A19c5db5e70f325", "Ae552a4998e3438"]]},
@@ -2470,6 +2470,7 @@ class SanityTest(BaseTest):
                   "name": "Ônibus",
                   "event_create": False,
                   "event_update": True,
+                  "event_remove": False,
                   "event_remove": False,
                   "event_configure": False,
                   "event_publish": False,
@@ -2862,16 +2863,21 @@ class SanityTest(BaseTest):
         time.sleep(2)
 
         # create device linha_4
-        Api.create_device(jwt, [template_ids[5]], "linha_4")
         self.logger.info('creating device linha_4...')
         rc, res = Api.create_device(jwt, [template_ids[5]], "linha_4")
         self.logger.info('Result: ' + str(res))
         #self.assertTrue(int(rc) == 200, "codigo inesperado")
 
         # update device linha_4
+        device_id = Api.get_deviceid_by_label(jwt, "linha_4")
+        self.logger.info('updating device linha_4...' + str(device_id))
+        data = {"templates": [template_ids[5]], "label": "update_linha_4"}
+        rc, res = Api.update_device(jwt, str(device_id), json.dumps(data))
+        self.logger.info('Result: ' + str(res))
+        #self.assertTrue(int(rc) == 200, "codigo inesperado")
 
         # delete device linha_4
-        device_id = Api.get_deviceid_by_label(jwt, "linha_4")
+        device_id = Api.get_deviceid_by_label(jwt, "update_linha_4")
         self.logger.info('removing device linha_4...')
         rc, res = Api.delete_device(jwt, str(device_id))
         self.logger.info('Result: ' + str(res))
