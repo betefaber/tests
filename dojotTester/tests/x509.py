@@ -25,6 +25,45 @@ class X509Test(BaseTest):
         rc, res = Api.get_schemas(jwt)
         return rc, res
 
+    def importData(self, jwt: str):
+        data = {
+            "devices": [{"attrs": [], "id": "12f286", "label": "sensor", "templates": [2]},
+                        {"attrs": [], "id": "33323f", "label": "dispositivo", "templates": [1]},
+                        {"attrs": [], "id": "41d208", "label": "device2", "templates": [2]},
+                        {"attrs": [], "id": "545da1", "label": "device5", "templates": [2]},
+                        {"attrs": [], "id": "5a15cc", "label": "sensor2", "templates": [2]},
+                        {"attrs": [{"created": "2021-07-05T18:21:38.149667+00:00", "id": 7, "is_static_overridden": True, "label": "serial", "static_value": "SN5242", "template_id": "1", "type": "static", "value_type": "string"},
+                                   {"created": "2021-07-05T18:21:38.149675+00:00", "id": 4, "label": "gps", "metadata": [{"created": "2021-07-05T18:21:38.152451+00:00", "id": 9, "is_static_overridden": True, "label": "descricao", "static_value": "posicao inicial", "type": "static", "updated": None, "value_type": "string"}], "template_id": "1", "type": "dynamic", "value_type": "geo:point"}], "id": "6206c6", "label": "dispositivo2", "templates": [1]},
+                        {"attrs": [], "id": "85bd7f", "label": "sensor4", "templates": [2]},
+                        {"attrs": [], "id": "9c7e06", "label": "device4", "templates": [2]},
+                        {"attrs": [], "id": "ae8533", "label": "device3", "templates": [2]},
+                        {"attrs": [], "id": "ca2133", "label": "sensor3", "templates": [2]},
+                        {"attrs": [], "id": "ced750", "label": "dispositivo3", "templates": [1]},
+                        {"attrs": [], "id": "f67d46", "label": "device", "templates": [2]}],
+            "templates": [{"attrs": [{"id": 8, "label": "objeto", "template_id": "1", "type": "dynamic", "value_type": "object"},
+                                     {"id": 7, "label": "serial", "static_value": "indefinido", "template_id": "1", "type": "static", "value_type": "string"},
+                                     {"id": 6, "label": "mensagem", "template_id": "1", "type": "actuator", "value_type": "string"},
+                                     {"id": 5, "label": "bool", "template_id": "1", "type": "dynamic", "value_type": "bool"},
+                                     { "id": 4, "label": "gps", "metadata": [{ "created": "2021-07-05T18:21:38.152451+00:00", "id": 9, "label": "descricao", "static_value": "localizacao do device", "type": "static", "updated": None, "value_type": "string"}], "template_id": "1", "type": "dynamic", "value_type": "geo:point"},
+                                     { "id": 3, "label": "text", "template_id": "1", "type": "dynamic", "value_type": "string"},
+                                     { "id": 2, "label": "int", "template_id": "1", "type": "dynamic", "value_type": "integer"},
+                                     { "id": 1, "label": "float", "template_id": "1", "type": "dynamic", "value_type": "float"}],
+                           "id": 1,
+                           "label": "Template"},
+                          {"attrs": [{"id": 11, "label": "model-id", "static_value": "model-001", "template_id": "2", "type": "static", "value_type": "string"},
+                                     {"id": 10, "label": "temperature", "template_id": "2", "type": "dynamic", "value_type": "float"}],
+                           "id": 2,
+                           "label": "SensorModel"},
+                          {"attrs": [{"id": 12, "label": "temperature", "template_id": "3", "type": "dynamic", "value_type": "float"}],
+                           "id": 3,
+                           "label": "Temperature"}],
+            "flowRemoteNodes": [],
+            "flows": [],
+            "cronJobs": []}
+
+        rc, res = Api.import_data(jwt, json.dumps(data))
+        return rc, res
+
     def createCertificate(self, jwt: str, csr: str):
         rc, res = Api.create_certificate(jwt, json.dumps(csr))
         return rc,res
@@ -98,12 +137,14 @@ class X509Test(BaseTest):
         self.logger.debug('getting jwt...')
         jwt = Api.get_jwt()
 
+        rc, res = self.importData(jwt)
+        self.assertTrue(int(rc) == 201, "codigo inesperado")
+
         self.logger.debug('listing certificates - no data...')
         rc, res = self.getCertificates(jwt)
         self.logger.debug('Certificates: ' + str(res))
         self.assertTrue(int(rc) == 200, "codigo inesperado")
 
-        
         self.logger.debug('creating certificate from CSR: sensor, device_id 12f286...')
         certificate = {
             "csr": "-----BEGIN CERTIFICATE REQUEST-----\nMIICVjCCAT4CAQAwETEPMA0GA1UEAwwGMTJmMjg2MIIBIjANBgkqhkiG9w0BAQEF\nAAOCAQ8AMIIBCgKCAQEA0IveTiBQUCaUjrUhFqJVE8cKZctF2SlGFhLOg56pMkBD\nQaL6w+LENt3kHg7fOjaw/ziR6GAWotxCv0CL4PvB+WZG6tzn360P0CIY4G9Ptlt5\noGsmHS5/1vRi818FPMZK+K5mf74Fy84QGBP903NxdeMUJoaLOFxp8mklQtFhxp08\nSEF/Bt9vCVw7NOfy2Cf+3Ol83Iqw7+bfZippaq1yssxusu+0q5iVYtdibBNU3ejP\n+brYR50kTvPLT8KvdupEriYXOR2MbaNZoEbL6CmolyMOIeNC4XQL8S/N9DAGVLPa\nqA3X67EqzhPYPoXqgxOCps/QGxKe78Nxn4CeejvUbQIDAQABoAAwDQYJKoZIhvcN\nAQELBQADggEBAECVuCuDJbwHJDJc7T3rUD1k4sEVTS6QDx99nbXFWmRK/fsC2nph\nsC9iPd2Y4gW/eIRdEBplrwS1/Q4erkAB6EtvLV2pT2H8pUEbTbRhcXBalgJyKeGQ\ndyXvsFeJk32WWWc6QvUcytzUDYzAz7kjEoBTfLjbQM4strXDg3tWMJPb5q1R1dA2\nsBUS7b5QaTPNS2NjUSv1Mu1ixxryNpR1Ajy7NNUNFkIEtURaxlAtrr83Jd5uDluu\nRnNVoxlZfRu7gBVW3ipUit2gv4Z4y5deB8Q8tN07qJ2MZd/KoUd9VdEgLdd2No6o\nrOkqXYzMukIgkRSd7OoyWgQ/sBIITBox6f4=\n-----END CERTIFICATE REQUEST-----"

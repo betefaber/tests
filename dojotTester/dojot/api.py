@@ -1262,8 +1262,34 @@ class DojotAPI:
         LOGGER.debug("... remote node created")
         return result_code, res
 
+    @staticmethod
+    def import_data(jwt: str, data=dict) -> tuple:
+        """
+        Import a database in Dojot.
 
+        Parameters:
+            jwt: JWT authorization.
 
+        Returns the imported data
+        """
+        LOGGER.debug("Importing database...")
+
+        if isinstance(data, dict):
+            data = json.dumps(data)
+
+        args = {
+            "url": "{0}/import".format(CONFIG['dojot']['url']),
+            "headers": {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer {0}".format(jwt),
+            },
+            "data": data,
+        }
+
+        result_code, res = DojotAPI.call_api(requests.post, args)
+
+        LOGGER.debug("... data imported")
+        return result_code, res
 
     @staticmethod
     def divide_loads(total: int, batch: int) -> List:
