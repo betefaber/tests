@@ -295,7 +295,7 @@ class DojotAPI:
             jwt: Dojot JWT token
             label: Dojot device label
 
-        Returns device ID or None
+        Returns device ID or None.
         """
         LOGGER.debug("Retrieving devices...")
 
@@ -834,7 +834,7 @@ class DojotAPI:
         return result_code, res
 
     @staticmethod
-    def create_certificate(jwt: str, data=dict) -> str: #tuple:
+    def create_certificate(jwt: str, data=dict) -> str:# tuple:
         """
         Create the device certificate
 
@@ -860,9 +860,8 @@ class DojotAPI:
 
         return result_code, res
 
-
     @staticmethod
-    def register_external_certificate(jwt: str, caFingerprint: str, certificateChain: str, device_id: str = None) -> str: #tuple:
+    def register_external_certificate(jwt: str, caFingerprint: str, certificateChain: str, device_id: str = None) -> str: # tuple:
         """
         Registers a x.509 certificate issued by a CA previously registered
 
@@ -872,7 +871,6 @@ class DojotAPI:
 
         if device_id is not None:
             device_id = str(device_id)
-
 
         data = {
             "caFingerprint": str(caFingerprint),
@@ -961,7 +959,6 @@ class DojotAPI:
 
         LOGGER.debug("... deleted certificate")
         return result_code, res
-
 
     @staticmethod
     def associate_certificate(jwt: str, fingerprint: str, device_id: str) -> tuple:
@@ -1230,7 +1227,6 @@ class DojotAPI:
         LOGGER.debug("... updated trusted CA")
         return result_code, res
 
-
     @staticmethod
     def create_remote_node(jwt: str, data=dict) -> tuple:
         """
@@ -1332,7 +1328,7 @@ class DojotAPI:
                 gevent.sleep(CONFIG['dojot']['api']['time'])
 
             else:
-                #return res.status_code, res.json()
+                # return res.status_code, res.json()
                 return res.status_code, res.json() if res.status_code != 204 else None
 
         raise APICallError("exceeded the number of retries to {0}".format(args['url']))

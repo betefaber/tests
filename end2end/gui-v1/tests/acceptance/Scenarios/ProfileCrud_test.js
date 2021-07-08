@@ -138,20 +138,3 @@ Scenario('@basic: Creating a profile, Name empty', (I) => {
     I.retry(5).see('Empty Profile name.');
     I.click(locate('.footer button').withAttr({ title: 'Discard' }));
 });
-
-// ///////////////////////////////////////////////////////////
-//  Teste de usuario e perfil, configurando permissições //
-// //////////////////////////////////////////////////////////
-
-
-// Feature('User Management');
-
-// // Usar outro comando, comando não pratico caso mude o endereço IP
-// Scenario('@basic: Open page User', async (I) => {
-//     I.amOnPage('#/auth');
-// });
-
-// Scenario('@basic: Create a new user', async (I) => {
-//     I.click(locate('input').withAttr({ title: 'userName46465' }));
-//     I.fillField('userName46465', 'TestUser1');
-// });
