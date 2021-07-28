@@ -834,7 +834,7 @@ class DojotAPI:
         return result_code, res
 
     @staticmethod
-    def create_certificate(jwt: str, data=dict) -> str:# tuple:
+    def create_certificate(jwt: str, data: dict) -> str: #tuple:
         """
         Create the device certificate
 
@@ -1228,7 +1228,7 @@ class DojotAPI:
         return result_code, res
 
     @staticmethod
-    def create_remote_node(jwt: str, data=dict) -> tuple:
+    def create_remote_node(jwt: str, data: dict) -> tuple:
         """
         Create a remote node in Dojot.
 
@@ -1259,7 +1259,7 @@ class DojotAPI:
         return result_code, res
 
     @staticmethod
-    def import_data(jwt: str, data=dict) -> tuple:
+    def import_data(jwt: str, data: dict) -> tuple:
         """
         Import a database in Dojot.
 
