@@ -4,6 +4,8 @@ from mqtt.mqttClient import MQTTClient
 import json
 import random
 import time
+from common.testutils import *
+
 
 class SanityTest(BaseTest):
     """
@@ -61,7 +63,7 @@ class SanityTest(BaseTest):
     def createRemoteNode(self, jwt: str, node: dict):
 
         rc, res = Api.create_remote_node(jwt, node)
-        # self.assertTrue(int(rc) == 200, "Error on create remote node")
+        #self.assertTrue(int(rc) == 200, "Error on create remote node")
         return rc, res
 
     def runTest(self):
@@ -81,8 +83,7 @@ class SanityTest(BaseTest):
                     "metadata": [{"label": "unidade", "type": "meta", "value_type": "string", "static_value": "°C"}]
                 }
             ]
-        }
-        )
+        })
         templates.append({
             "label": "medidor de pressao",
             "attrs": [
@@ -382,7 +383,7 @@ class SanityTest(BaseTest):
         self.logger.info("devices ids: " + str(devices_ids))
 
         ###################
-        # Configuring flows
+        #Configuring flows
         ###################
         flows = []
         flows.append({
@@ -891,7 +892,7 @@ class SanityTest(BaseTest):
             }
         )
 
-        # Adicionar o no remoto kelvin
+        #Adicionar o no remoto kelvin
 
         self.createRemoteNode(jwt, {"image": "dojot/kelvin-example:3.0.0-alpha2", "id": "kelvin"})
 
@@ -2641,7 +2642,7 @@ class SanityTest(BaseTest):
 
         self.logger.info("Groups created. IDs: " + str(group1_id))
 
-        # TODO adicionar as permissoes ao grupo
+        #TODO adicionar as permissoes ao grupo
 
         rc, res = Api.add_permission(jwt, group1_id, "2")
         self.logger.info("Permissions added to the group: " + str(group1_id))
@@ -2658,11 +2659,11 @@ class SanityTest(BaseTest):
         # adicionar usuario
 
         user1 = {"username": "bete",
-                 "service": "teste",
-                 "email": "bete@noemail.com",
-                 "name": "Elisabete",
-                 "profile": "admin"
-                 }
+            "service": "teste",
+            "email": "bete@noemail.com",
+            "name": "Elisabete",
+            "profile": "admin"
+            }
         self.createUsers(jwt, user1)
         self.logger.info("User created: bete")
 
@@ -2685,25 +2686,48 @@ class SanityTest(BaseTest):
         dev1 = MQTTClient(dev1_id)
         self.logger.info("publicando com dispositivo: " + dev1_id)
         dev1.publish(dev1_topic,
-                     {"gps": "-22.890970, -47.063006", "velocidade": 50, "passageiros": 30, "operacional": False})
-        time.sleep(1)
-        dev1.publish(dev1_topic,
-                     {"gps": "-22.893619, -47.052921", "velocidade": 40, "passageiros": 45, "operacional": True})
-        time.sleep(5)
+                     {"gps":"-22.890970, -47.063006","velocidade":50,"passageiros":30,"operacional":False})
+        time.sleep(8)  # waiting for flow
+        # check publication in history
+        rc, res = get_history_last_attr(self, jwt, dev1_id, "velocidade")
+        self.assertTrue(rc == 200, "** FAILED ASSERTION: received an unexpected result code: " + str(rc) + " **")
+        self.assertTrue(res["value"] == 50, "** FAILED ASSERTION: received an unexpected message: " +
+                        str(res["value"]) + " **")
+        # check flow result
+        rc, res = get_history_last_attr(self, jwt, dev1_id, "letreiro")
+        self.assertTrue(rc == 200, "** FAILED ASSERTION: received an unexpected result code: " + str(rc) + " **")
+        self.assertTrue(res["value"] == "JARDIM PAULISTA", "** FAILED ASSERTION: received an unexpected message: " +
+                        res["value"] + " **")
 
+        rc, res = get_history_last_attr(self, jwt, dev1_id, "mensagem")
+        self.assertTrue(rc == 200, "** FAILED ASSERTION: received an unexpected result code: " + str(rc) + " **")
+        self.assertTrue(res["value"] == "Não está no Cambuí", "** FAILED ASSERTION: received an unexpected message: " +
+                        res["value"] + " **")
+
+        dev1.publish(dev1_topic,
+                     {"gps":"-22.893619, -47.052921","velocidade":40,"passageiros":45,"operacional":True})
+        time.sleep(8)
+        rc, res = get_history_last_attr(self, jwt, dev1_id, "letreiro")
+        self.assertTrue(rc == 200, "** FAILED ASSERTION: received an unexpected result code **")
+        self.assertTrue(res["value"] == "LOTADO", "** FAILED ASSERTION: received an unexpected message: " +
+                        res["value"] + " **")
+
+        rc, res = get_history_last_attr(self, jwt, dev1_id, "mensagem")
+        self.assertTrue(rc == 200, "** FAILED ASSERTION: received an unexpected result code: " + str(rc) + " **")
+        self.assertTrue(res["value"] == "Está no Cambuí", "** FAILED ASSERTION: received an unexpected message: " +
+                        res["value"] + " **")
+
+        rc, count = get_history_count_attr_value(self, jwt, dev1_id, "letreiro", "LOTADO")
+        self.assertTrue(count == 1, "** FAILED ASSERTION: received an unexpected count **")
+
+        # Device 2 - dispositivo
         dev2_id = Api.get_deviceid_by_label(jwt, "dispositivo")
         dev2_topic = "admin:" + dev2_id + "/attrs"
         dev2 = MQTTClient(dev2_id)
         self.logger.info("publicando com dispositivo: " + dev2_id)
         dev2.publish(dev2_topic, {"int": 2})
 
-        # TODO: obter histórico do dev1_id
-
-        Api.get_history_device(jwt, dev1_id)
-
-        time.sleep(1)
-
-        # TODO: obter histórico do dev2_id
+        ## TODO: obter histórico do dev2_id
 
         Api.get_history_device(jwt, dev2_id)
 
@@ -2851,10 +2875,11 @@ class SanityTest(BaseTest):
         time.sleep(2)
 
         # create device linha_4
+        Api.create_device(jwt, [template_ids[5]], "linha_4")
         self.logger.info('creating device linha_4...')
         rc, res = Api.create_device(jwt, [template_ids[5]], "linha_4")
         self.logger.info('Result: ' + str(res))
-        # self.assertTrue(int(rc) == 200, "codigo inesperado")
+        #self.assertTrue(int(rc) == 200, "codigo inesperado")
 
         # update device linha_4
         device_id = Api.get_deviceid_by_label(jwt, "linha_4")
@@ -2869,4 +2894,5 @@ class SanityTest(BaseTest):
         self.logger.info('removing device linha_4...')
         rc, res = Api.delete_device(jwt, str(device_id))
         self.logger.info('Result: ' + str(res))
-        # self.assertTrue(int(rc) == 200, "codigo inesperado")
+        #self.assertTrue(int(rc) == 200, "codigo inesperado")
+

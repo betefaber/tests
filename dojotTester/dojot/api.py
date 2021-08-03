@@ -684,19 +684,46 @@ class DojotAPI:
         return result_code, res
 
     @staticmethod
-    def get_history_device(jwt: str, label: str) -> tuple:
+    def get_history_device(jwt: str, label: str, attrs: str or list = None, datefrom: str = None, dateto: str = None,
+                           lastn: int = None, firstn: int = None) -> tuple:
         """
         Retrieves device attributes data from Dojot.
 
         Parameters:
             jwt: Dojot JWT token
             label: Dojot device label
+            attrs: Device attribute to be requested. If not used, returns all attributes.
+            datefrom: Start time of a time-based query
+            dateto: End time of a time-based query
+            lastn: Number of most current values (valid for each attribute, if more than one). You can use lastN with
+            or without dateFrom/dateTo.
+            firstn: Number of oldest values (valid for each attribute, if more than one). You can use firstN with
+            or without dateFrom/dateTo.
 
             """
         LOGGER.debug("Retrieving history...")
 
+        # /device/{device_id}/history?lastN={lastN}&attr={attr}&dateFrom={dateFrom}&dateTo={dateTo}
+        url = "{0}/history/device/{1}/history?".format(CONFIG['dojot']['url'], label)
+        if attrs is not None:
+            if type(attrs) is str:
+                attrs = [attrs]
+            url = url + "attr=" + ",".join(attrs) + "&"
+
+        if lastn is not None:
+            url = url + "lastN=" + str(lastn) + "&"
+
+        if firstn is not None:
+            url = url + "firstN=" + str(firstn) + "&"
+
+        if datefrom is not None:
+            url = url + "dateFrom=" + datefrom + "&"
+
+        if dateto is not None:
+            url = url + "dateTo=" + dateto + "&"
+
         args = {
-            "url": "{0}/history/device/{1}/history".format(CONFIG['dojot']['url'], label),
+            "url": url,
             "headers": {
                 "Content-Type": "application/json",
                 "Authorization": "Bearer {0}".format(jwt),
