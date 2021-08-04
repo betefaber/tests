@@ -66,7 +66,6 @@ class SanityTest(BaseTest):
         #self.assertTrue(int(rc) == 200, "Error on create remote node")
         return rc, res
 
-
     def runTest(self):
         self.logger.info('Executing sanity test')
         self.logger.debug('getting jwt...')
@@ -529,41 +528,41 @@ class SanityTest(BaseTest):
                     "mode": "polyline",
                     "filter": "outside",
                     "points":
-                        [ { "latitude": "-22.893729786643423",
-                            "longitude": "-47.060708999633796" },
-                          { "latitude": "-22.888827380892344", "longitude": "-47.0570182800293" },
-                          { "latitude": "-22.887720361534203",
-                            "longitude": "-47.053241729736335" },
-                          { "latitude": "-22.88724592190222", "longitude": "-47.04869270324708" },
-                          { "latitude": "-22.88692962789286", "longitude": "-47.04483032226563" },
-                          { "latitude": "-22.890646035948535", "longitude": "-47.04671859741211" },
-                          { "latitude": "-22.895073963731004",
-                            "longitude": "-47.047061920166016" },
-                          { "latitude": "-22.90013427567171", "longitude": "-47.048091888427734" },
-                          { "latitude": "-22.905589713001355", "longitude": "-47.0463752746582" },
-                          { "latitude": "-22.905115335858504",
-                            "longitude": "-47.050237655639656" },
-                          { "latitude": "-22.905115335858504", "longitude": "-47.05195426940918" },
-                          { "latitude": "-22.906143150903915", "longitude": "-47.05530166625977" },
-                          { "latitude": "-22.902427167370448",
-                            "longitude": "-47.057275772094734" },
-                          { "latitude": "-22.899027348564793",
-                            "longitude": "-47.058563232421875" },
-                          { "latitude": "-22.896813467251835", "longitude": "-47.05890655517578" } ],
-                    "geopoint": "payload.data.attrs.gps",
-                    "x": 412,
-                    "y": 372,
-                    "wires": [ [ "44d30981.231c48" ] ] },
+                        [{"latitude": "-22.893729786643423",
+                          "longitude": "-47.060708999633796"},
+                         {"latitude": "-22.888827380892344", "longitude": "-47.0570182800293"},
+                         {"latitude": "-22.887720361534203",
+                          "longitude": "-47.053241729736335"},
+                         {"latitude": "-22.88724592190222", "longitude": "-47.04869270324708"},
+                         {"latitude": "-22.88692962789286", "longitude": "-47.04483032226563"},
+                         {"latitude": "-22.890646035948535", "longitude": "-47.04671859741211"},
+                         {"latitude": "-22.895073963731004",
+                          "longitude": "-47.047061920166016"},
+                         {"latitude": "-22.90013427567171", "longitude": "-47.048091888427734"},
+                         {"latitude": "-22.905589713001355", "longitude": "-47.0463752746582"},
+                         {"latitude": "-22.905115335858504",
+                          "longitude": "-47.050237655639656"},
+                         {"latitude": "-22.905115335858504", "longitude": "-47.05195426940918"},
+                         {"latitude": "-22.906143150903915", "longitude": "-47.05530166625977"},
+                         {"latitude": "-22.902427167370448",
+                          "longitude": "-47.057275772094734"},
+                         {"latitude": "-22.899027348564793",
+                          "longitude": "-47.058563232421875"},
+                         {"latitude": "-22.896813467251835", "longitude": "-47.05890655517578"}],
+                  "geopoint": "payload.data.attrs.gps",
+                  "x": 412,
+                  "y": 372,
+                  "wires": [["44d30981.231c48"]]},
                  {"id": "44d30981.231c48",
-                    "type": "change",
-                    "z": "3433da79.e543a6",
-                    "name": "",
-                    "rules":
-                        [ { "t": "set",
-                            "p": "saida.mensagem",
-                            "pt": "msg",
-                            "to": "Não está no Cambuí",
-                            "tot": "str" } ],
+                  "type": "change",
+                  "z": "3433da79.e543a6",
+                  "name": "",
+                  "rules":
+                  [{"t": "set",
+                    "p": "saida.mensagem",
+                    "pt": "msg",
+                    "to": "Não está no Cambuí",
+                    "tot": "str"}],
                     "action": "",
                     "property": "",
                     "from": "",
@@ -571,74 +570,74 @@ class SanityTest(BaseTest):
                     "reg": "false",
                     "x": 773,
                     "y": 365,
-                    "wires": [ [ "25c1c361.88827c" ] ] },
+                    "wires": [["25c1c361.88827c"]]},
                  {"id": "25c1c361.88827c",
-                    "type": "multi device out",
-                    "z": "3433da79.e543a6",
-                    "name": "",
-                    "device_source": "self",
-                    "devices_source_dynamic": "",
-                    "devices_source_dynamicFieldType": "msg",
-                    "devices_source_configured": [ "" ],
-                    "_devices_loaded": "true",
-                    "attrs": "saida",
-                    "x": 1110.5,
-                    "y": 225,
-                    "wires": [] }
-                  ]
-        })
+                  "type": "multi device out",
+                  "z": "3433da79.e543a6",
+                  "name": "",
+                  "device_source": "self",
+                  "devices_source_dynamic": "",
+                  "devices_source_dynamicFieldType": "msg",
+                  "devices_source_configured": [""],
+                  "_devices_loaded": "true",
+                  "attrs": "saida",
+                  "x": 1110.5,
+                  "y": 225,
+                  "wires": []}
+                 ]
+            })
         flows.append({
             "name": "http - POST",
             "flow": [
-                { "id": "f66d93e3.8f42e", "type": "tab", "label": "Flow 1" },
-                { "id": "853a54b9.f53208",
-                  "type": "device template in",
-                  "z": "f66d93e3.8f42e",
-                  "name": "ônibus",
-                  "device_template": { "id": template_ids[5] },
-                  "status": "false",
-                  "device_template_id": template_ids[5],
-                  "x": 136.5,
-                  "y": 144,
-                  "wires": [ [ "ce40a438.e567c8" ] ] },
-                { "id": "784cd62a.09b088",
-                  "type": "http",
-                  "z": "f66d93e3.8f42e",
-                  "name": "",
-                  "method": "POST",
-                  "ret": "txt",
-                  "body": "reqBody",
-                  "response": "responseGet",
-                  "url": "http://ptsv2.com/t/3fbhu-1543424220/post",
-                  "x": 918.5,
-                  "y": 408,
-                  "wires": [] },
-                { "id": "ce40a438.e567c8",
-                  "type": "switch",
-                  "z": "f66d93e3.8f42e",
-                  "name": "velocidade >= 50",
-                  "property": "payload.velocidade",
-                  "propertyType": "msg",
-                  "rules": [ { "t": "gte", "v": "50", "vt": "num" } ],
-                  "checkall": "true",
-                  "outputs": "1",
-                  "x": 409.5,
-                  "y": 210,
-                  "wires": [ [ "5d51ecfa.baa4e4" ] ] },
-                { "id": "5d51ecfa.baa4e4",
-                  "type": "template",
-                  "z": "f66d93e3.8f42e",
-                  "name": "",
-                  "field": "reqBody",
-                  "fieldType": "msg",
-                  "syntax": "handlebars",
-                  "template": "{\"payload\": \"velocidade muito alta: {{payload.velocidade}} km/h!\"}",
-                  "output": "str",
-                  "x": 651.5,
-                  "y": 318,
-                  "wires": [ [ "784cd62a.09b088" ] ] }
-            ]
-        })
+                {"id": "f66d93e3.8f42e", "type": "tab", "label": "Flow 1"},
+                {"id": "853a54b9.f53208",
+                 "type": "device template in",
+                 "z": "f66d93e3.8f42e",
+                 "name": "ônibus",
+                 "device_template": {"id": template_ids[5]},
+                 "status": "false",
+                 "device_template_id": template_ids[5],
+                 "x": 136.5,
+                 "y": 144,
+                 "wires": [["ce40a438.e567c8"]]},
+                {"id": "784cd62a.09b088",
+                 "type": "http",
+                 "z": "f66d93e3.8f42e",
+                 "name": "",
+                 "method": "POST",
+                 "ret": "txt",
+                 "body": "reqBody",
+                 "response": "responseGet",
+                 "url": "http://ptsv2.com/t/3fbhu-1543424220/post",
+                 "x": 918.5,
+                 "y": 408,
+                 "wires": []},
+                {"id": "ce40a438.e567c8",
+                 "type": "switch",
+                 "z": "f66d93e3.8f42e",
+                 "name": "velocidade >= 50",
+                 "property": "payload.velocidade",
+                 "propertyType": "msg",
+                 "rules": [{"t": "gte", "v": "50", "vt": "num"}],
+                 "checkall": "true",
+                 "outputs": "1",
+                 "x": 409.5,
+                 "y": 210,
+                 "wires": [["5d51ecfa.baa4e4"]]},
+                {"id": "5d51ecfa.baa4e4",
+                 "type": "template",
+                 "z": "f66d93e3.8f42e",
+                 "name": "",
+                 "field": "reqBody",
+                 "fieldType": "msg",
+                 "syntax": "handlebars",
+                 "template": "{\"payload\": \"velocidade muito alta: {{payload.velocidade}} km/h!\"}",
+                 "output": "str",
+                 "x": 651.5,
+                 "y": 318,
+                 "wires": [["784cd62a.09b088"]]}
+                ]
+            })
         flows.append(
             {
                 "name": "template e actuate - deprecated nodes",
@@ -896,8 +895,6 @@ class SanityTest(BaseTest):
         #Adicionar o no remoto kelvin
 
         self.createRemoteNode(jwt, {"image": "dojot/kelvin-example:3.0.0-alpha2", "id": "kelvin"})
-
-
 
         flows.append({
             "name": "kelvin flow",
@@ -1219,7 +1216,7 @@ class SanityTest(BaseTest):
                      "z": "81f229c7.c43d88",
                      "name": "",
                      "method": "PUT",
-                     "url": "ftp://10.202.71.7",
+                     "url": "ftp://10.50.4.31",
                      "username": "dojot",
                      "password": "dojot",
                      "filename": "data_filename",
@@ -1270,7 +1267,7 @@ class SanityTest(BaseTest):
                      "z": "81f229c7.c43d88",
                      "name": "",
                      "method": "PUT",
-                     "url": "ftp://10.202.71.7",
+                     "url": "ftp://10.50.4.31",
                      "username": "dojot",
                      "password": "dojot",
                      "filename": "image_filename",
@@ -1285,7 +1282,7 @@ class SanityTest(BaseTest):
                      "z": "81f229c7.c43d88",
                      "name": "",
                      "method": "PUT",
-                     "url": "ftp://192.168.0.38",
+                     "url": "ftp://localhost",
                      "username": "dojot",
                      "password": "dojot",
                      "filename": "image_filename",
@@ -1300,7 +1297,7 @@ class SanityTest(BaseTest):
                      "z": "81f229c7.c43d88",
                      "name": "",
                      "method": "PUT",
-                     "url": "ftp://192.168.0.38",
+                     "url": "ftp://localhost",
                      "username": "dojot",
                      "password": "dojot",
                      "filename": "data_filename",
@@ -1325,10 +1322,9 @@ class SanityTest(BaseTest):
                      "wires": [["dfbec05a.9604c8"]]}]
         })
 
-        device_id=Api.get_deviceid_by_label(jwt, 'device')
-        dispositivo_id=Api.get_deviceid_by_label(jwt,"dispositivo")
+        device_id = Api.get_deviceid_by_label(jwt, 'device')
+        dispositivo_id = Api.get_deviceid_by_label(jwt, "dispositivo")
         current_time = int(time.time() * 1000)
-
 
         flows.append({
             "name": "CRON-BATCH-BROKER",
@@ -2350,7 +2346,7 @@ class SanityTest(BaseTest):
                  "ret": "obj",
                  "body": "request",
                  "response": "resposta",
-                 "url": "http://192.168.0.38:8000/auth",
+                 "url": "http://10.50.4.33/auth",
                  "x": 326.5,
                  "y": 275,
                  "wires": [["A19c5db5e70f325", "Ae552a4998e3438"]]},
@@ -2634,11 +2630,8 @@ class SanityTest(BaseTest):
                   "wires": [["d708a3a6.a6735"]]}]
         })
 
-
         flows_ids = self.createFlows(jwt, flows)
-
         self.logger.info("Flows created. IDs: " + str(flows_ids))
-
 
         group1 = {"name": "viewer" + str(random.randint(0, 100)),
                   "description": "Grupo com acesso somente para visualizar as informações"}
@@ -2663,7 +2656,6 @@ class SanityTest(BaseTest):
         self.logger.info("Permissions added to the group: " + str(group1_id))
         self.assertTrue(int(rc) == 200, "codigo inesperado")
 
-
         # adicionar usuario
 
         user1 = {"username": "bete",
@@ -2675,7 +2667,6 @@ class SanityTest(BaseTest):
         self.createUsers(jwt, user1)
         self.logger.info("User created: bete")
 
-
         user2 = {
             "username": "maria",
             "service": "teste",
@@ -2686,8 +2677,7 @@ class SanityTest(BaseTest):
         self.createUsers(jwt, user2)
         self.logger.info("User created: maria")
 
-
-        #TODO listar tenants
+        # TODO listar tenants
 
         # publicações
 
@@ -2739,7 +2729,7 @@ class SanityTest(BaseTest):
 
         ## TODO: obter histórico do dev2_id
 
-        Api.get_history_device(jwt,dev2_id)
+        Api.get_history_device(jwt, dev2_id)
 
         time.sleep(1)
 
@@ -2852,7 +2842,6 @@ class SanityTest(BaseTest):
 
         time.sleep(10)
 
-
         dev_id = Api.get_deviceid_by_label(jwt, "acesso")
         dev_topic = "admin:" + dev_id + "/attrs"
         dev = MQTTClient(dev_id)
@@ -2893,9 +2882,15 @@ class SanityTest(BaseTest):
         #self.assertTrue(int(rc) == 200, "codigo inesperado")
 
         # update device linha_4
+        device_id = Api.get_deviceid_by_label(jwt, "linha_4")
+        self.logger.info('updating device linha_4...' + str(device_id))
+        data = {"templates": [template_ids[5]], "label": "update_linha_4"}
+        rc, res = Api.update_device(jwt, str(device_id), json.dumps(data))
+        self.logger.info('Result: ' + str(res))
+        # self.assertTrue(int(rc) == 200, "codigo inesperado")
 
         # delete device linha_4
-        device_id = Api.get_deviceid_by_label(jwt, "linha_4")
+        device_id = Api.get_deviceid_by_label(jwt, "update_linha_4")
         self.logger.info('removing device linha_4...')
         rc, res = Api.delete_device(jwt, str(device_id))
         self.logger.info('Result: ' + str(res))
