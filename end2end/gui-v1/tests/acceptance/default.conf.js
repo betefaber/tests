@@ -24,10 +24,14 @@ const config = {
                 handleSIGTERM: false,
                 handleSIGHUP: false,
                 defaultViewport: {
+                    // width: 1280,
+                    // height: 720,
                     width: 1280,
                     height: 720,
                 },
             },
+
+            timeout: 100000
         },
 
         // add para gui v2
@@ -50,6 +54,7 @@ const config = {
         Notification: './PageObject/Notification.js',
         Template: './PageObject/Template.js',
         User: './PageObject/User.js',
+        v2: './PageObject/v2.js',
     },
     plugins: {
         allure: {},
