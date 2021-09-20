@@ -66,7 +66,7 @@ module.exports = {
 
     clickNextPage(){
         I.click('Go to next page')
-        I.wact(1)
+        I.wait(1)
         I.click('Go to next page')
         I.wait(2)
     },
