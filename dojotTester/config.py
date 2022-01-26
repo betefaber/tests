@@ -10,7 +10,7 @@ CONFIG = {
     'security': {
         'dns_cert': [],
         'ejbca_ca_name': "IOTmidCA",
-        'cert_dir': os.environ.get("CERT_DIR", "cert/"),
+        'cert_dir': os.environ.get("CERT_DIR", "resources/cert/"),
         'ca_cert_file': os.environ.get("CA_CERT_FILE", "ca.crt"),
     },
 
@@ -19,6 +19,12 @@ CONFIG = {
         'port': int(os.environ.get("DOJOT_MQTT_PORT", 1883)),
         'con_timeout': int(os.environ.get("DOJOT_MQTT_TIMEOUT", 120)),
         'qos': int(os.environ.get("DOJOT_MQTT_QOS", 1)),
+    },
+
+    'http': {
+        'host': os.environ.get("DOJOT_HOST", "localhost"),
+        'port': int(os.environ.get("DOJOT_PORT", 8080)),
+        'con_timeout': int(os.environ.get("DOJOT_TIMEOUT", 120)),
     },
 
     'dojot': {

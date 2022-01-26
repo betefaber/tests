@@ -2,6 +2,7 @@
 API calls to Dojot.
 """
 import json
+import time
 from typing import Callable, List
 import requests
 import gevent
@@ -41,9 +42,11 @@ class DojotAPI:
             },
         }
 
-        _, res = DojotAPI.call_api(requests.post, args)
-
-        LOGGER.debug(".. retrieved JWT")
+        rc, res = DojotAPI.call_api(requests.post, args)
+        if rc == 429:
+            time.sleep(15)
+            rc, res = DojotAPI.call_api(requests.post, args)
+        LOGGER.debug(".. retrieved JWT. Result code: " + str(rc))
         return res["jwt"]
 
     @staticmethod
@@ -861,7 +864,7 @@ class DojotAPI:
         return result_code, res
 
     @staticmethod
-    def create_certificate(jwt: str, data: dict) -> str: #tuple:
+    def create_certificate(jwt: str, data: dict or str) -> tuple:
         """
         Create the device certificate
 
@@ -871,6 +874,10 @@ class DojotAPI:
 
         if isinstance(data, dict):
             data = json.dumps(data)
+
+        data = json.dumps({
+            "csr": data
+        })
 
         args = {
             "url": "{0}/x509/v1/certificates".format(CONFIG['dojot']['url']),
@@ -1011,6 +1018,33 @@ class DojotAPI:
         }
 
         result_code, res = DojotAPI.call_api(requests.patch, args)
+
+        LOGGER.debug("... associated certificate")
+        return result_code, res
+
+
+    @staticmethod
+    def disassociate_certificate(jwt: str, fingerprint: str) -> tuple:
+        """
+        disassociate a device with a certificate
+        Returns the updated device ID or a error message.
+        """
+        LOGGER.debug("disassociate a device with a certificate...")
+
+        data = json.dumps({
+            "belongsTo": {
+                "device": None
+            }
+        })
+        args = {
+            "url": "{0}/x509/v1/certificates/{1}/belongsto".format(CONFIG['dojot']['url'], fingerprint),
+            "headers": {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer {0}".format(jwt),
+            }
+        }
+
+        result_code, res = DojotAPI.call_api(requests.delete, args)
 
         LOGGER.debug("... associated certificate")
         return result_code, res

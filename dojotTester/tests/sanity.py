@@ -5,6 +5,7 @@ import json
 import random
 import time
 from common.testutils import *
+from dojotTester import ROOT_DIR
 
 
 class SanityTest(BaseTest):
@@ -2826,7 +2827,7 @@ class SanityTest(BaseTest):
         dev_topic = "admin:" + dev_id + "/attrs"
         dev = MQTTClient(dev_id)
         self.logger.info("publicando com dispositivo: " + dev_id)
-        file_t = open("/l/disk0/efaber/dojot-github/tests/dojotTester/arquivo.jpg.txt", 'rb')
+        file_t = open(ROOT_DIR + "/" + "resources/img/arquivo.jpg.txt", 'rb')
         blob_data = bytearray(file_t.read())
         dev.publish(dev_topic, blob_data)
 
@@ -2836,7 +2837,7 @@ class SanityTest(BaseTest):
         dev_topic = "admin:" + dev_id + "/attrs"
         dev = MQTTClient(dev_id)
         self.logger.info("publicando com dispositivo: " + dev_id)
-        file_t = open("/l/disk0/efaber/dojot-github/tests/dojotTester/arquivo.jpg.qualcomm.txt", 'rb')
+        file_t = open(ROOT_DIR + "/" + "resources/img/arquivo.jpg.qualcomm.txt", 'rb')
         blob_data = bytearray(file_t.read())
         dev.publish(dev_topic, blob_data)
 

@@ -111,7 +111,9 @@ def load_test_modules():
     return result
 
 
-def get_test(name):
+def get_test(name: str) -> unittest.TestSuite:
+    target = name.rsplit('.')
+    suite = unittest.TestSuite()
     test_modules = load_test_modules()
 
     sorted_tests = []
@@ -120,40 +122,57 @@ def get_test(name):
         for (testname, test) in sorted(tests.items()):
             sorted_tests.append(test)
 
-    logger.debug("test modules:" + str(sorted_tests))
+    # logger.debug("test modules:" + str(sorted_tests))
 
-    # verify if name is a suite
-    if name in test_modules.keys():
+    # verify if target is a suite
+    if target[0] in test_modules.keys():
         logger.info('Suite found')
-        suite = unittest.TestSuite()
-        _, tests = test_modules[name]
-        for testname, test in tests.items():
-            suite.addTest(test())
+        _, tests = test_modules[target[0]]
+        if len(target) == 1:
+            for testname, test in tests.items():
+                if test._disabled:
+                    continue
+                if 'manual' in test._groups:
+                    continue
+                suite.addTest(test())
+        else:
+            if target[1] in tests.keys():
+                suite.addTest(tests[target[1]]())
         return suite
 
     for test in sorted_tests:
-        if name == test.__name__:
-            return test
+        if target[0] == test.__name__:
+            suite.addTest(test())
+            return suite
+
+    for test in sorted_tests:
+        if test._disabled:
+            continue
+        if 'manual' in test._groups:
+            continue
+        if target[0] in test._groups:
+            suite.addTest(test())
+    return suite
 
 
 if __name__ == "__main__":
-    if "linux" in sys.platform and os.getuid() != 0:
-        print("Super-user privileges required. Please re-run with sudo or as root.")
-        sys.exit(1)
+    # if "linux" in sys.platform and os.getuid() != 0:
+    #     print("Super-user privileges required. Please re-run with sudo or as root.")
+    #     sys.exit(1)
 
     # Building the argument parser
     parser = argparse.ArgumentParser()
     parser.add_argument("test", help="Test or test suite")
     parser.add_argument("-l", "--list", help="List available tests and exit", action=ListTestsAction)
     args = parser.parse_args()
-    teste = args.test
-    logger.info("Trying to execute test " + teste)
+
+    # target can be a test case, a suite test and a group
+    target = args.test
+    logger.info("Trying to execute test " + target)
 
     runner = unittest.TextTestRunner(verbosity=2)
 
-    test_obj = get_test(teste)
+    test_obj = get_test(target)
 
-    if type(test_obj) == unittest.TestSuite:
-        runner.run(test_obj)
-    else:
-        runner.run(test_obj())
+    runner.run(test_obj)
+
