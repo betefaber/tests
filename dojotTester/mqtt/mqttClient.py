@@ -45,4 +45,5 @@ class MQTTClient:
     def publish(self, topic, payload):
         if isinstance(payload, dict):
             payload = json.dumps(payload)
-        self.client.publish(topic, payload)
+        #self.client.publish(topic, payload, qos=1)
+        return self.client.publish(topic, payload, qos=1).rc
