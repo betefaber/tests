@@ -64,7 +64,7 @@ class X509Test(BaseTest):
         rc, res = Api.import_data(jwt, json.dumps(data))
         return rc, res
 
-    def createCertificate(self, jwt: str, csr: str):
+    def createCertificate(self, jwt: str, csr: str or dict):
         rc, res = Api.create_certificate(jwt, json.dumps(csr))
         return rc,res
 

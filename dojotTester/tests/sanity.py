@@ -67,10 +67,25 @@ class SanityTest(BaseTest):
         #self.assertTrue(int(rc) == 200, "Error on create remote node")
         return rc, res
 
+    def importData(self, jwt: str):
+
+        data = {"devices":[],
+                "templates":[],
+                "flowRemoteNodes":[],
+                "flows":[],
+                "cronJobs":[]}
+        rc, res = Api.import_data(jwt, json.dumps(data))
+        return rc, res
+
     def runTest(self):
         self.logger.info('Executing sanity test')
         self.logger.debug('getting jwt...')
         jwt = Api.get_jwt()
+
+        rc, res = self.importData(jwt)
+        self.assertTrue(int(rc) == 201, "codigo inesperado")
+
+        time.sleep(10)
 
         templates = []
         self.logger.debug('creating templates...')
@@ -396,62 +411,58 @@ class SanityTest(BaseTest):
                     "label": "Flow 1"
                 },
                 {
-                    "id": "15bcb272.91022e",
-                    "name": "anemometro",
-                    "device_source_id": "anemometro (" + Api.get_deviceid_by_label(jwt, 'anemometro') + ")",
-                    "status": "false",
-                    "type": "device in",
-                    "wires": [["8d24f81d.b96308"]],
-                    "x": 205.72567749023438,
-                    "y": 214.06947326660156,
-                    "z": "38b9fd8d.9d0a72",
-                    "_device_id": Api.get_deviceid_by_label(jwt, "anemometro"),
-                    "_device_label": "",
-                    "_device_type": ""
-                },
-                {
-                    "checkall": "true",
                     "id": "8d24f81d.b96308",
+                    "type": "switch",
+                    "z": "38b9fd8d.9d0a72",
                     "name": "velocidade >= 50",
-                    "outputs": 1,
-                    "property": "payload.velocidade",
+                    "property": "payload.data.attrs.velocidade",
                     "propertyType": "msg",
                     "rules": [{"t": "gte", "v": "50", "vt": "num"}],
-                    "type": "switch",
-                    "wires": [["9ae043f5.e5d12"]],
+                    "checkall": "true",
+                    "outputs": 1,
                     "x": 346.7292022705078,
                     "y": 285.10418224334717,
-                    "z": "38b9fd8d.9d0a72"
-                },
+                    "wires": [["9ae043f5.e5d12"]]},
                 {
-                    "action": "",
-                    "from": "",
                     "id": "9ae043f5.e5d12",
-                    "name": "",
-                    "property": "",
-                    "reg": "false",
-                    "rules": [{"t": "set", "p": "saida.mensagem", "pt": "msg", "to": "vento muito forte", "tot": "str"}],
-                    "to": "",
                     "type": "change",
-                    "wires": [["62a3753b.7edc0c"]],
+                    "z": "38b9fd8d.9d0a72",
+                    "name": "",
+                    "rules": [
+                        {"t": "set", "p": "saida.mensagem", "pt": "msg", "to": "vento muito forte", "tot": "str"}],
+                    "action": "",
+                    "property": "",
+                    "from": "",
+                    "to": "",
+                    "reg": "False",
                     "x": 502.7291717529297,
                     "y": 361.1180591583252,
-                    "z": "38b9fd8d.9d0a72"
-                },
+                    "wires": [["62a3753b.7edc0c"]]},
                 {
-                    "attrs": "saida",
+                    "id": "62a3753b.7edc0c",
+                    "type": "multi device out",
+                    "z": "38b9fd8d.9d0a72",
+                    "name": "controle",
                     "device_source": "configured",
                     "devices_source_dynamic": "",
                     "devices_source_dynamicFieldType": "msg",
                     "devices_source_configured": [Api.get_deviceid_by_label(jwt, "controle")],
+                    "attrs": "saida",
                     "_devices_loaded": True,
-                    "id": "62a3753b.7edc0c",
-                    "name": "controle",
-                    "type": "multi device out",
-                    "wires": [],
                     "x": 688.7326736450195,
                     "y": 435.0903205871582,
-                    "z": "38b9fd8d.9d0a72"
+                    "wires": []},
+                {
+                    "id": "A8fae64845c2bc8",
+                    "type": "event device in",
+                    "z": "38b9fd8d.9d0a72",
+                    "name": "anemometro",
+                    "event_configure": False,
+                    "event_publish": True,
+                    "device_id": Api.get_deviceid_by_label(jwt, "anemometro"),
+                    "x": 194.83332061767578,
+                    "y": 194.4722385406494,
+                    "wires": [["8d24f81d.b96308"]]
                 }
             ]
         })
@@ -590,55 +601,66 @@ class SanityTest(BaseTest):
         flows.append({
             "name": "http - POST",
             "flow": [
-                {"id": "f66d93e3.8f42e", "type": "tab", "label": "Flow 1"},
-                {"id": "853a54b9.f53208",
-                 "type": "device template in",
-                 "z": "f66d93e3.8f42e",
-                 "name": "ônibus",
-                 "device_template": {"id": template_ids[5]},
-                 "status": "false",
-                 "device_template_id": template_ids[5],
-                 "x": 136.5,
-                 "y": 144,
-                 "wires": [["ce40a438.e567c8"]]},
-                {"id": "784cd62a.09b088",
-                 "type": "http",
-                 "z": "f66d93e3.8f42e",
-                 "name": "",
-                 "method": "POST",
-                 "ret": "txt",
-                 "body": "reqBody",
-                 "response": "responseGet",
-                 "url": "http://ptsv2.com/t/3fbhu-1543424220/post",
-                 "x": 918.5,
-                 "y": 408,
-                 "wires": []},
-                {"id": "ce40a438.e567c8",
-                 "type": "switch",
-                 "z": "f66d93e3.8f42e",
-                 "name": "velocidade >= 50",
-                 "property": "payload.velocidade",
-                 "propertyType": "msg",
-                 "rules": [{"t": "gte", "v": "50", "vt": "num"}],
-                 "checkall": "true",
-                 "outputs": "1",
-                 "x": 409.5,
-                 "y": 210,
-                 "wires": [["5d51ecfa.baa4e4"]]},
-                {"id": "5d51ecfa.baa4e4",
-                 "type": "template",
-                 "z": "f66d93e3.8f42e",
-                 "name": "",
-                 "field": "reqBody",
-                 "fieldType": "msg",
-                 "syntax": "handlebars",
-                 "template": "{\"payload\": \"velocidade muito alta: {{payload.velocidade}} km/h!\"}",
-                 "output": "str",
-                 "x": 651.5,
-                 "y": 318,
-                 "wires": [["784cd62a.09b088"]]}
-                ]
-            })
+                {
+                    "id": "f66d93e3.8f42e",
+                    "type": "tab",
+                    "label": "Flow 1"},
+                {
+                    "id": "784cd62a.09b088",
+                    "type": "http",
+                    "z": "f66d93e3.8f42e",
+                    "name": "",
+                    "method": "POST",
+                    "ret": "txt",
+                    "body": "reqBody",
+                    "response": "responseGet",
+                    "url": "http://ptsv2.com/t/3fbhu-1543424220/post",
+                    "x": 918.5,
+                    "y": 408,
+                    "wires": [[]]},
+                {
+                    "id": "ce40a438.e567c8",
+                    "type": "switch",
+                    "z": "f66d93e3.8f42e",
+                    "name": "velocidade >= 50",
+                    "property": "payload.data.attrs.velocidade",
+                    "propertyType": "msg",
+                    "rules": [{"t": "gte", "v": "50", "vt": "num"}],
+                    "checkall": "true",
+                    "outputs": 1,
+                    "x": 409.5,
+                    "y": 210,
+                    "wires": [["5d51ecfa.baa4e4"]]},
+                {
+                    "id": "5d51ecfa.baa4e4",
+                    "type": "template",
+                    "z": "f66d93e3.8f42e",
+                    "name": "",
+                    "field": "reqBody",
+                    "fieldType": "msg",
+                    "syntax": "handlebars",
+                    "template": "{\"payload\": \"velocidade muito alta: {{payload.data.attrs.velocidade}} km/h!\"}",
+                    "output": "str",
+                    "x": 651.5,
+                    "y": 318,
+                    "wires": [["784cd62a.09b088"]]},
+                {
+                    "id": "Ab2a83cae5916a",
+                    "type": "event template in",
+                    "z": "f66d93e3.8f42e",
+                    "name": "ônibus",
+                    "event_create": False,
+                    "event_update": False,
+                    "event_remove": False,
+                    "event_configure": False,
+                    "event_publish": True,
+                    "template_id": str(template_ids[5]),
+                    "x": 162.82294845581055,
+                    "y": 126.4444408416748,
+                    "wires": [["ce40a438.e567c8"]]
+                }
+            ]
+        })
         flows.append(
             {
                 "name": "template e actuate - deprecated nodes",
@@ -661,7 +683,7 @@ class SanityTest(BaseTest):
                       "property": "payload.umidade",
                       "propertyType": "msg",
                       "rules": [{"t": "lte", "v": "20", "vt": "num"}],
-                      "checkall": "true",
+                      "checkall": "false",
                       "outputs": "1",
                       "x": 346.5,
                       "y": 196,
@@ -695,207 +717,186 @@ class SanityTest(BaseTest):
         flows.append(
             {
                 "name": "email flow",
-                "flow":
-                    [{"id": "7589258f.32474c", "type": "tab", "label": "Flow 1"},
-                     {"id": "443c695c.5f0258",
-                      "type": "device template in",
-                      "z": "7589258f.32474c",
-                      "name": "medidor de temperatura",
-                      "device_template": {"id": template_ids[0]},
-                      "status": "false",
-                      "device_template_id": template_ids[0],
-                      "x": 227.5,
-                      "y": 130,
-                      "wires": [["e332b8ea.277ec8"]]},
-                     {"id": "54771336.9f930c",
-                      "type": "email",
-                      "z": "7589258f.32474c",
-                      "server": "gmail-smtp-in.l.google.com",
-                      "port": "25",
-                      "secure": "false",
-                      "name": "",
-                      "dname": "",
-                      "to": "efaber@cpqd.com.br",
-                      "from": "dojotcpqd@gmail.com",
-                      "subject": "aviso",
-                      "body": "emailBody",
-                      "userid": "",
-                      "password": "",
-                      "x": 880.5,
-                      "y": 442,
-                      "wires": []},
-                     {"id": "e332b8ea.277ec8",
-                      "type": "switch",
-                      "z": "7589258f.32474c",
-                      "name": "temperatura >= 30",
-                      "property": "payload.temperatura",
-                      "propertyType": "msg",
-                      "rules": [{"t": "gte", "v": "30", "vt": "num"}],
-                      "checkall": "true",
-                      "outputs": "1",
-                      "x": 435.5,
-                      "y": 225,
-                      "wires": [["e853395f.05b6c8"]]},
-                     {"id": "e853395f.05b6c8",
-                      "type": "template",
-                      "z": "7589258f.32474c",
-                      "name": "",
-                      "field": "emailBody",
-                      "fieldType": "msg",
-                      "syntax": "handlebars",
-                      "template": "Temperatura muito alta: {{payload.temperatura}} °C !",
-                      "output": "str",
-                      "x": 640.5,
-                      "y": 321,
-                      "wires": [["54771336.9f930c"]]}
-                     ]
-            }
-        )
+                "flow": [
+                    {"id": "7589258f.32474c", "type": "tab", "label": "Flow 1"},
+                    {"id": "54771336.9f930c",
+                     "type": "email",
+                     "z": "7589258f.32474c",
+                     "server": "gmail-smtp-in.l.google.com",
+                     "port": "25",
+                     "secure": "False",
+                     "name": "",
+                     "dname": "",
+                     "to": "efaber@cpqd.com.br",
+                     "from": "dojotcpqd@gmail.com",
+                     "subject": "aviso",
+                     "body": "emailBody",
+                     "userid": "",
+                     "password": "",
+                     "x": 880.5,
+                     "y": 442,
+                     "wires": []},
+                    {"id": "e332b8ea.277ec8",
+                     "type": "switch",
+                     "z": "7589258f.32474c",
+                     "name": "temperatura >= 30",
+                     "property": "payload.data.attrs.temperatura",
+                     "propertyType": "msg",
+                     "rules": [{"t": "gte", "v": "30", "vt": "num"}],
+                     "checkall": "true",
+                     "outputs": 1,
+                     "x": 435.5,
+                     "y": 225,
+                     "wires": [["e853395f.05b6c8"]]},
+                    {"id": "e853395f.05b6c8",
+                     "type": "template",
+                     "z": "7589258f.32474c",
+                     "name": "",
+                     "field": "emailBody",
+                     "fieldType": "msg",
+                     "syntax": "handlebars",
+                     "template": "Temperatura muito alta: {{payload.temperatura}} °C !",
+                     "output": "str",
+                     "x": 640.5,
+                     "y": 321,
+                     "wires": [["54771336.9f930c"]]},
+                    {"id": "A32d0b1ee76fa4e",
+                     "type": "event template in",
+                     "z": "7589258f.32474c",
+                     "name": "medidor de temperatura",
+                     "event_create": False,
+                     "event_update": False,
+                     "event_remove": False,
+                     "event_configure": False,
+                     "event_publish": True,
+                     "template_id": str(template_ids[0]),
+                     "x": 225.83328247070312,
+                     "y": 122.44444847106934,
+                     "wires": [["e332b8ea.277ec8"]]
+                     }
+                ]
+            })
         flows.append(
             {
                 "name": "aggregation flow",
-                "flow":
-                    [{"id": "98435f56.9245", "type": "tab", "label": "Flow 1"},
-                     {"id": "88edde.0161522",
-                      "type": "device in",
-                      "z": "98435f56.9245",
-                      "name": "anemometro",
-                      "device_source_id": "anemometro (" + Api.get_deviceid_by_label(jwt, 'anemometro') + ")",
-                      "status": "false",
-                      "_device_id": Api.get_deviceid_by_label(jwt, 'anemometro'),
-                      "_device_label": "",
-                      "_device_type": "",
-                      "x": 243.5,
-                      "y": 111,
-                      "wires": [["377408a3.9807d8"]]},
-                     {"id": "27520e8e.5e66e2",
-                      "type": "device in",
-                      "z": "98435f56.9245",
-                      "name": "barometro",
-                      "device_source_id": "barometro (" + Api.get_deviceid_by_label(jwt, 'barometro') + ")",
-                      "status": "false",
-                      "_device_id": Api.get_deviceid_by_label(jwt, 'barometro'),
-                      "_device_label": "",
-                      "_device_type": "",
-                      "x": 236.5,
-                      "y": 203,
-                      "wires": [["51915a08.9c5114"]]},
-                     {"id": "fb20a30f.55923",
-                      "type": "device in",
-                      "z": "98435f56.9245",
-                      "name": "higrometro",
-                      "device_source_id": "higrometro (" + Api.get_deviceid_by_label(jwt, 'higrometro') + ")",
-                      "status": "false",
-                      "_device_id": Api.get_deviceid_by_label(jwt, 'higrometro'),
-                      "_device_label": "",
-                      "_device_type": "",
-                      "x": 247.5,
-                      "y": 304,
-                      "wires": [["75604141.97a9c"]]},
-                     {"id": "2161ad27.fecae2",
-                      "type": "device in",
-                      "z": "98435f56.9245",
-                      "name": "termometro",
-                      "device_source_id": "termometro Celsius(" + Api.get_deviceid_by_label(jwt, 'termometro Celsius') + ")",
-                      "status": "false",
-                      "_device_id": Api.get_deviceid_by_label(jwt, 'termometro Celsius'),
-                      "_device_label": "",
-                      "_device_type": "",
-                      "x": 251.5,
-                      "y": 423,
-                      "wires": [["afd596e6.3c6ac8"]]},
-                     {"id": "377408a3.9807d8",
-                      "type": "change",
-                      "z": "98435f56.9245",
-                      "name": "",
-                      "rules":
-                          [{"t": "set",
-                            "p": "saida.velocidade",
-                            "pt": "msg",
-                            "to": "payload.velocidade",
-                            "tot": "msg"}],
-                      "action": "",
-                      "property": "",
-                      "from": "",
-                      "to": "",
-                      "reg": "false",
-                      "x": 582.5,
-                      "y": 111,
-                      "wires": [["986ce39c.97953"]]},
-                     {"id": "51915a08.9c5114",
-                      "type": "change",
-                      "z": "98435f56.9245",
-                      "name": "",
-                      "rules":
-                          [{"t": "set",
-                            "p": "saida.pressao",
-                            "pt": "msg",
-                            "to": "payload.pressao",
-                            "tot": "msg"}],
-                      "action": "",
-                      "property": "",
-                      "from": "",
-                      "to": "",
-                      "reg": "false",
-                      "x": 600,
-                      "y": 186,
-                      "wires": [["986ce39c.97953"]]},
-                     {"id": "75604141.97a9c",
-                      "type": "change",
-                      "z": "98435f56.9245",
-                      "name": "",
-                      "rules":
-                          [{"t": "set",
-                            "p": "saida.umidade",
-                            "pt": "msg",
-                            "to": "payload.umidade",
-                            "tot": "msg"}],
-                      "action": "",
-                      "property": "",
-                      "from": "",
-                      "to": "",
-                      "reg": "false",
-                      "x": 585,
-                      "y": 304,
-                      "wires": [["986ce39c.97953"]]},
-                     {"id": "afd596e6.3c6ac8",
-                      "type": "change",
-                      "z": "98435f56.9245",
-                      "name": "",
-                      "rules":
-                          [{"t": "set",
-                            "p": "saida.temperatura",
-                            "pt": "msg",
-                            "to": "payload.temperatura",
-                            "tot": "msg"}],
-                      "action": "",
-                      "property": "",
-                      "from": "",
-                      "to": "",
-                      "reg": "false",
-                      "x": 596,
-                      "y": 424,
-                      "wires": [["986ce39c.97953"]]},
-                     {"id": "986ce39c.97953",
-                      "type": "multi device out",
-                      "z": "98435f56.9245",
-                      "name": "instrumento de medicao",
-                      "device_source": "configured",
-                      "devices_source_dynamic": "",
-                      "devices_source_dynamicFieldType": "msg",
-                      "devices_source_configured": [Api.get_deviceid_by_label(jwt, 'instrumento de medicao')],
-                      "_devices_loaded": True,
-                      "attrs": "saida",
-                      "x": 950.5,
-                      "y": 296,
-                      "wires": []}
-                     ]
-            }
-        )
+                "flow": [
+                    {"id": "98435f56.9245", "type": "tab", "label": "Flow 1"},
+                    {"id": "377408a3.9807d8",
+                     "type": "change",
+                     "z": "98435f56.9245",
+                     "name": "",
+                     "rules": [
+                         {"t": "set", "p": "saida.velocidade", "pt": "msg", "to": "payload.data.attrs.velocidade", "tot": "msg"}],
+                     "action": "",
+                     "property": "",
+                     "from": "",
+                     "to": "",
+                     "reg": "False",
+                     "x": 582.5,
+                     "y": 111,
+                     "wires": [["986ce39c.97953"]]},
+                    {"id": "51915a08.9c5114",
+                     "type": "change",
+                     "z": "98435f56.9245",
+                     "name": "",
+                     "rules": [{"t": "set", "p": "saida.pressao", "pt": "msg", "to": "payload.data.attrs.pressao", "tot": "msg"}],
+                     "action": "",
+                     "property": "",
+                     "from": "",
+                     "to": "",
+                     "reg": "False",
+                     "x": 585.0000152587891,
+                     "y": 185.00000095367432,
+                     "wires": [["986ce39c.97953"]]},
+                    {"id": "75604141.97a9c",
+                     "type": "change",
+                     "z": "98435f56.9245",
+                     "name": "",
+                     "rules": [{"t": "set", "p": "saida.umidade", "pt": "msg", "to": "payload.data.attrs.umidade", "tot": "msg"}],
+                     "action": "",
+                     "property": "",
+                     "from": "",
+                     "to": "",
+                     "reg": "False",
+                     "x": 578.0000152587891,
+                     "y": 281.00002002716064,
+                     "wires": [["986ce39c.97953"]]},
+                    {"id": "afd596e6.3c6ac8",
+                     "type": "change",
+                     "z": "98435f56.9245",
+                     "name": "",
+                     "rules": [{"t": "set", "p": "saida.temperatura", "pt": "msg", "to": "payload.data.attrs.temperatura",
+                                "tot": "msg"}],
+                     "action": "",
+                     "property": "",
+                     "from": "",
+                     "to": "",
+                     "reg": "False",
+                     "x": 589,
+                     "y": 376.99999237060547,
+                     "wires": [["986ce39c.97953"]]},
+                    {"id": "986ce39c.97953",
+                     "type": "multi device out",
+                     "z": "98435f56.9245",
+                     "name": "instrumento de medicao",
+                     "device_source": "configured",
+                     "devices_source_dynamic": "",
+                     "devices_source_dynamicFieldType": "msg",
+                     "devices_source_configured": [Api.get_deviceid_by_label(jwt, "instrumento de medicao")],
+                     "attrs": "saida",
+                     "_devices_loaded": True,
+                     "x": 995.5000305175781,
+                     "y": 265.0000057220459,
+                     "wires": []},
+                    {"id": "A65fce786f17de8",
+                     "type": "event device in",
+                     "z": "98435f56.9245",
+                     "name": "anemometro",
+                     "event_configure": False,
+                     "event_publish": True,
+                     "device_id": Api.get_deviceid_by_label(jwt, "anemometro"),
+                     "x": 263.83677673339844,
+                     "y": 117.46529006958008,
+                     "wires": [["377408a3.9807d8"]]},
+                    {"id": "Adc3bc25ed5c2f",
+                     "type": "event device in",
+                     "z": "98435f56.9245",
+                     "name": "barometro",
+                     "event_configure": False,
+                     "event_publish": True,
+                     "device_id": Api.get_deviceid_by_label(jwt, "barometro"),
+                     "x": 267.84027099609375,
+                     "y": 191.46875381469727,
+                     "wires": [["51915a08.9c5114"]]},
+                    {"id": "Aaaa10fc17b48b",
+                     "type": "event device in",
+                     "z": "98435f56.9245",
+                     "name": "higrometro",
+                     "event_configure": False,
+                     "event_publish": True,
+                     "device_id": Api.get_deviceid_by_label(jwt, "higrometro"),
+                     "x": 270.8333435058594,
+                     "y": 281.4653253555298,
+                     "wires": [["75604141.97a9c"]]},
+                    {"id": "Adf74d262bb56e",
+                     "type": "event device in",
+                     "z": "98435f56.9245",
+                     "name": "termometro",
+                     "event_configure": False,
+                     "event_publish": True,
+                     "device_id": Api.get_deviceid_by_label(jwt, "termometro"),
+                     "x": 267.8298645019531,
+                     "y": 379.46184253692627,
+                     "wires": [["afd596e6.3c6ac8"]]
+                     }
+                ]
+            })
 
         #Adicionar o no remoto kelvin
 
         self.createRemoteNode(jwt, {"image": "dojot/kelvin-example:3.0.0-alpha2", "id": "kelvin"})
+
+        time.sleep(5)
 
         flows.append({
             "name": "kelvin flow",
@@ -939,7 +940,7 @@ class SanityTest(BaseTest):
         })
 
         flows.append({
-            "name": "device in flow",
+            "name": "device in flow - deprecated",
             "flow":
                 [{"id": "33fa4ae3.618106", "type": "tab", "label": "Flow 1"},
                  {"id": "48890b68.172a74",
@@ -1074,79 +1075,82 @@ class SanityTest(BaseTest):
 
         flows.append({
             "name": "actuate flow",
-            "flow":
-                [{"id": "7320e2d3.7984bc", "type": "tab", "label": "Flow 1"},
-                 {"id": "a26f3b44.379118",
-                  "type": "device template in",
-                  "z": "7320e2d3.7984bc",
-                  "name": "ônibus",
-                  "device_template": {"id": template_ids[5]},
-                  "status": "false",
-                  "device_template_id": template_ids[5],
-                  "x": 93.5,
-                  "y": 226,
-                  "wires": [["e98654fe.c42fa8"]]},
-                 {"id": "e98654fe.c42fa8",
-                  "type": "switch",
-                  "z": "7320e2d3.7984bc",
-                  "name": "passageiros >= 40",
-                  "property": "payload.passageiros",
-                  "propertyType": "msg",
-                  "rules": [{"t": "gte", "v": "40", "vt": "num"}, {"t": "lt", "v": "40", "vt": "num"}],
-                  "checkall": "true",
-                  "outputs": 2,
-                  "x": 305.5,
-                  "y": 229,
-                  "wires": [["7fd783d8.7fa12c"], ["f8be2e5c.7e6c7"]]},
-                 {"id": "7fd783d8.7fa12c",
-                  "type": "change",
-                  "z": "7320e2d3.7984bc",
-                  "name": "LOTADO",
-                  "rules":
-                      [{"t": "set",
-                        "p": "saida.letreiro",
-                        "pt": "msg",
-                        "to": "LOTADO",
-                        "tot": "str"}],
-                  "action": "",
-                  "property": "",
-                  "from": "",
-                  "to": "",
-                  "reg": False,
-                  "x": 551.5,
-                  "y": 142,
-                  "wires": [["af8485c5.8352d8"]]},
-                 {"id": "af8485c5.8352d8",
-                  "type": "multi actuate",
-                  "z": "7320e2d3.7984bc",
-                  "name": "",
-                  "device_source": "self",
-                  "devices_source_configured": [""],
-                  "devices_source_dynamic": "",
-                  "devices_source_dynamicFieldType": "msg",
-                  "attrs": "saida",
-                  "_devices_loaded": True,
-                  "x": 816.5,
-                  "y": 228,
-                  "wires": []},
-                 {"id": "f8be2e5c.7e6c7",
-                  "type": "change",
-                  "z": "7320e2d3.7984bc",
-                  "name": "JARDIM PAULISTA",
-                  "rules":
-                      [{"t": "set",
-                        "p": "saida.letreiro",
-                        "pt": "msg",
-                        "to": "JARDIM PAULISTA",
-                        "tot": "str"}],
-                  "action": "",
-                  "property": "",
-                  "from": "",
-                  "to": "",
-                  "reg": False,
-                  "x": 576,
-                  "y": 313,
-                  "wires": [["af8485c5.8352d8"]]}]
+            "flow": [
+                {
+                    "id": "7320e2d3.7984bc",
+                    "type": "tab",
+                    "label": "Flow 1"},
+                {
+                    "id": "e98654fe.c42fa8",
+                    "type": "switch",
+                    "z": "7320e2d3.7984bc",
+                    "name": "passageiros >= 40",
+                    "property": "payload.data.attrs.passageiros",
+                    "propertyType": "msg",
+                    "rules": [{"t": "gte", "v": "40", "vt": "num"}, {"t": "lt", "v": "40", "vt": "num"}],
+                    "checkall": "true",
+                    "outputs": 2,
+                    "x": 305.5,
+                    "y": 229,
+                    "wires": [["7fd783d8.7fa12c"], ["f8be2e5c.7e6c7"]]},
+                {
+                    "id": "7fd783d8.7fa12c",
+                    "type": "change",
+                    "z": "7320e2d3.7984bc",
+                    "name": "LOTADO",
+                    "rules": [{"t": "set", "p": "saida.letreiro", "pt": "msg", "to": "LOTADO", "tot": "str"}],
+                    "action": "",
+                    "property": "",
+                    "from": "",
+                    "to": "",
+                    "reg": False,
+                    "x": 551.5,
+                    "y": 142,
+                    "wires": [["af8485c5.8352d8"]]},
+                {
+                    "id": "af8485c5.8352d8",
+                    "type": "multi actuate",
+                    "z": "7320e2d3.7984bc",
+                    "name": "",
+                    "device_source": "self",
+                    "devices_source_dynamic": "",
+                    "devices_source_dynamicFieldType": "msg",
+                    "devices_source_configured": [""],
+                    "attrs": "saida",
+                    "_devices_loaded": True,
+                    "x": 816.5,
+                    "y": 228,
+                    "wires": []},
+                {
+                    "id": "f8be2e5c.7e6c7",
+                    "type": "change",
+                    "z": "7320e2d3.7984bc",
+                    "name": "JARDIM PAULISTA",
+                    "rules": [{"t": "set", "p": "saida.letreiro", "pt": "msg", "to": "JARDIM PAULISTA", "tot": "str"}],
+                    "action": "",
+                    "property": "",
+                    "from": "",
+                    "to": "",
+                    "reg": False,
+                    "x": 576,
+                    "y": 313,
+                    "wires": [["af8485c5.8352d8"]]},
+                {
+                    "id": "A1cdb61011de64f",
+                    "type": "event template in",
+                    "z": "7320e2d3.7984bc",
+                    "name": "ônibus",
+                    "event_create": False,
+                    "event_update": False,
+                    "event_remove": False,
+                    "event_configure": False,
+                    "event_publish": True,
+                    "template_id": str(template_ids[5]),
+                    "x": 92.84027099609375,
+                    "y": 229.4444637298584,
+                    "wires": [["e98654fe.c42fa8"]]
+                }
+            ]
         })
 
         flows.append({
@@ -1222,7 +1226,7 @@ class SanityTest(BaseTest):
                      "password": "dojot",
                      "filename": "data_filename",
                      "filecontent": "data_content",
-                     "fileencoding": "utf-8",
+                     "fileencoding": "utf8",
                      "response": "ftp_output",
                      "x": 817.5,
                      "y": 301,
@@ -1303,7 +1307,7 @@ class SanityTest(BaseTest):
                      "password": "dojot",
                      "filename": "data_filename",
                      "filecontent": "data_content",
-                     "fileencoding": "utf-8",
+                     "fileencoding": "utf8",
                      "response": "ftp_output",
                      "x": 819.5,
                      "y": 376,
@@ -1392,7 +1396,7 @@ class SanityTest(BaseTest):
                   "field": "reqJOB",
                   "fieldType": "msg",
                   "syntax": "handlebars",
-                  "template": "[          \n  {\n    \"time\": \"*/3 * * * *\",\n    \"timezone\": \"America/Sao_Paulo\",\n    \"name\": \"Keep alive\",\n    \"description\": \"This job sends a keep alive notification to a device every 3 minutes\",\n    \"broker\": {\n        \"subject\": \"dojot.device-manager.device\",\n        \"message\": {\n               \"event\":\"configure\",\n                \"meta\": {\n                    \"service\": \"admin\",\n                    \"timestamp\": "+str(current_time)+"},\n               \"data\": {\n                   \"attrs\": { \"mensagem\": \"keepalive\"},\n                   \"id\": \""+dispositivo_id+"\" \n                }\n        }\n    }\n   }\n]",
+                  "template": "[          \n  {\n    \"time\": \"*/1 * * * *\",\n    \"timezone\": \"America/Sao_Paulo\",\n    \"name\": \"Keep alive\",\n    \"description\": \"This job sends a keep alive notification to a device every 3 minutes\",\n    \"broker\": {\n        \"subject\": \"dojot.device-manager.device\",\n        \"message\": {\n               \"event\":\"configure\",\n                \"meta\": {\n                    \"service\": \"admin\",\n                    \"timestamp\": "+str(current_time)+"},\n               \"data\": {\n                   \"attrs\": { \"mensagem\": \"keepalive\"},\n                   \"id\": \""+dispositivo_id+"\" \n                }\n        }\n    }\n   }\n]",
                   "output": "json",
                   "x": 494.5,
                   "y": 61,
@@ -1541,7 +1545,7 @@ class SanityTest(BaseTest):
                   "wires": [[]]}]
         })
 
-        time.sleep(1)
+        time.sleep(2)
         current_time = int(time.time() * 1000)
 
         flows.append({
@@ -1668,7 +1672,7 @@ class SanityTest(BaseTest):
                   "z": "A2720aa5be2e886",
                   "name": "",
                   "operation": "CREATE",
-                  "cronTimeExpression": "*/3 * * * *",
+                  "cronTimeExpression": "*/1 * * * *",
                   "jobName": "tô vivo 2",
                   "jobDescription": "Esse job envia notificação de tô vivo 2 a cada 3 minutos",
                   "jobType": "HTTP REQUEST",
@@ -2682,57 +2686,66 @@ class SanityTest(BaseTest):
 
         # publicações
 
-        dev1_id = Api.get_deviceid_by_label(jwt, "linha_1")
-        dev1_topic = "admin:" + dev1_id + "/attrs"
-        dev1 = MQTTClient(dev1_id)
-        self.logger.info("publicando com dispositivo: " + dev1_id)
-        dev1.publish(dev1_topic,
+        #Device - linha_1
+
+        dev_id = Api.get_deviceid_by_label(jwt, "linha_1")
+        dev_topic = "admin:" + dev_id + "/attrs"
+        dev = MQTTClient(dev_id)
+        self.logger.info("publicando com dispositivo: " + dev_id)
+        rc = dev.publish(dev_topic,
                      {"gps":"-22.890970, -47.063006","velocidade":50,"passageiros":30,"operacional":False})
-        time.sleep(8)  # waiting for flow
+        self.logger.info("rc: " + str(rc))
+        self.assertTrue(rc == 0, "** FAILED ASSERTION: received an unexpected result code: " + str(rc) + " **")
+        self.logger.info("waiting for flows...")
+        time.sleep(15)  # waiting for flow
         # check publication in history
-        rc, res = get_history_last_attr(self, jwt, dev1_id, "velocidade")
+        rc, res = get_history_last_attr(self, jwt, dev_id, "velocidade")
         self.assertTrue(rc == 200, "** FAILED ASSERTION: received an unexpected result code: " + str(rc) + " **")
         self.assertTrue(res["value"] == 50, "** FAILED ASSERTION: received an unexpected message: " +
                         str(res["value"]) + " **")
         # check flow result
-        rc, res = get_history_last_attr(self, jwt, dev1_id, "letreiro")
+        rc, res = get_history_last_attr(self, jwt, dev_id, "letreiro")
         self.assertTrue(rc == 200, "** FAILED ASSERTION: received an unexpected result code: " + str(rc) + " **")
         self.assertTrue(res["value"] == "JARDIM PAULISTA", "** FAILED ASSERTION: received an unexpected message: " +
                         res["value"] + " **")
 
-        rc, res = get_history_last_attr(self, jwt, dev1_id, "mensagem")
+        rc, res = get_history_last_attr(self, jwt, dev_id, "mensagem")
         self.assertTrue(rc == 200, "** FAILED ASSERTION: received an unexpected result code: " + str(rc) + " **")
         self.assertTrue(res["value"] == "Não está no Cambuí", "** FAILED ASSERTION: received an unexpected message: " +
                         res["value"] + " **")
 
-        dev1.publish(dev1_topic,
+        dev.publish(dev_topic,
                      {"gps":"-22.893619, -47.052921","velocidade":40,"passageiros":45,"operacional":True})
-        time.sleep(8)
-        rc, res = get_history_last_attr(self, jwt, dev1_id, "letreiro")
+        self.logger.info("waiting for flows...")
+        time.sleep(10)
+        rc, res = get_history_last_attr(self, jwt, dev_id, "letreiro")
         self.assertTrue(rc == 200, "** FAILED ASSERTION: received an unexpected result code **")
         self.assertTrue(res["value"] == "LOTADO", "** FAILED ASSERTION: received an unexpected message: " +
                         res["value"] + " **")
 
-        rc, res = get_history_last_attr(self, jwt, dev1_id, "mensagem")
+        rc, res = get_history_last_attr(self, jwt, dev_id, "mensagem")
         self.assertTrue(rc == 200, "** FAILED ASSERTION: received an unexpected result code: " + str(rc) + " **")
         self.assertTrue(res["value"] == "Está no Cambuí", "** FAILED ASSERTION: received an unexpected message: " +
                         res["value"] + " **")
 
-        rc, count = get_history_count_attr_value(self, jwt, dev1_id, "letreiro", "LOTADO")
+        rc, count = get_history_count_attr_value(self, jwt, dev_id, "letreiro", "LOTADO")
         self.assertTrue(count == 1, "** FAILED ASSERTION: received an unexpected count **")
 
-        # Device 2 - dispositivo
-        dev2_id = Api.get_deviceid_by_label(jwt, "dispositivo")
-        dev2_topic = "admin:" + dev2_id + "/attrs"
-        dev2 = MQTTClient(dev2_id)
-        self.logger.info("publicando com dispositivo: " + dev2_id)
-        dev2.publish(dev2_topic, {"int": 2})
+        rc, count = get_history_count_attr(self, jwt, dev_id, "mensagem")
+        self.assertTrue(count == 2, "** FAILED ASSERTION: received an unexpected count **")
+        self.logger.info("total de registros: " + str(count))
 
-        ## TODO: obter histórico do dev2_id
+        dev_id = Api.get_deviceid_by_label(jwt, "dispositivo")
+        dev_topic = "admin:" + dev_id + "/attrs"
+        dev = MQTTClient(dev_id)
+        self.logger.info("publicando com dispositivo: " + dev_id)
+        dev.publish(dev_topic, {"int": 2})
 
-        Api.get_history_device(jwt, dev2_id)
+        time.sleep(3)
 
-        time.sleep(1)
+        rc, count = get_history_count_attr(self, jwt, dev_id, "int")
+        self.assertTrue(count == 1, "** FAILED ASSERTION: received an unexpected count **")
+        self.logger.info("total de registros: " + str(count))
 
         dev_id = Api.get_deviceid_by_label(jwt, "anemometro")
         dev_topic = "admin:" + dev_id + "/attrs"
@@ -2740,7 +2753,11 @@ class SanityTest(BaseTest):
         self.logger.info("publicando com dispositivo: " + dev_id)
         dev.publish(dev_topic, {"velocidade": 50})
 
-        time.sleep(2)
+        time.sleep(3)
+
+        rc, count = get_history_count_attr(self, jwt, dev_id, "velocidade")
+        self.assertTrue(count == 1, "** FAILED ASSERTION: received an unexpected count **")
+        self.logger.info("total de registros: " + str(count))
 
         dev_id = Api.get_deviceid_by_label(jwt, "barometro")
         dev_topic = "admin:" + dev_id + "/attrs"
@@ -2748,7 +2765,11 @@ class SanityTest(BaseTest):
         self.logger.info("publicando com dispositivo: " + dev_id)
         dev.publish(dev_topic, {"pressao": 0.9})
 
-        time.sleep(2)
+        time.sleep(3)
+
+        rc, count = get_history_count_attr(self, jwt, dev_id, "pressao")
+        self.assertTrue(count == 1, "** FAILED ASSERTION: received an unexpected count **")
+        self.logger.info("total de registros: " + str(count))
 
         dev_id = Api.get_deviceid_by_label(jwt, "higrometro")
         dev_topic = "admin:" + dev_id + "/attrs"
@@ -2756,7 +2777,22 @@ class SanityTest(BaseTest):
         self.logger.info("publicando com dispositivo: " + dev_id)
         dev.publish(dev_topic, {"umidade": 15})
 
-        time.sleep(2)
+        time.sleep(3)
+
+        rc, count = get_history_count_attr(self, jwt, dev_id, "umidade")
+        self.assertTrue(count == 1, "** FAILED ASSERTION: received an unexpected count **")
+        self.logger.info("total de registros: " + str(count))
+
+        time.sleep(3)
+
+
+        dev_id = Api.get_deviceid_by_label(jwt, "device")
+        rc, res = get_history_first_attr(self, jwt, dev_id, "mensagem")
+        self.assertTrue(rc == 200, "** FAILED ASSERTION: received an unexpected result code: " + str(rc) + " **")
+        self.logger.info("device_id: " + str(dev_id) + ", mensagem: " + str(res))
+
+        self.assertTrue(res["value"] == "baixa umidade relativa do ar: 15 !", "** FAILED ASSERTION: received an unexpected message: " +
+                        str(res["value"]) + " **")
 
         dev_id = Api.get_deviceid_by_label(jwt, "termometro Celsius")
         dev_topic = "admin:" + dev_id + "/attrs"
@@ -2764,23 +2800,36 @@ class SanityTest(BaseTest):
         self.logger.info("publicando com dispositivo: " + dev_id)
         dev.publish(dev_topic, {"temperatura": 30})
 
-        time.sleep(2)
+        time.sleep(3)
+
+        rc, count = get_history_count_attr(self, jwt, dev_id, "temperatura")
+        self.assertTrue(count == 1, "** FAILED ASSERTION: received an unexpected count **")
+        self.logger.info("total de registros: " + str(count))
+
+        #ativação do cron
 
         dev_id = Api.get_deviceid_by_label(jwt, "device")
         dev_topic = "admin:" + dev_id + "/attrs"
         dev = MQTTClient(dev_id)
         self.logger.info("publicando com dispositivo: " + dev_id)
         dev.publish(dev_topic, {"bool": True})
-
         time.sleep(5)
+        rc, count = get_history_count_attr(self, jwt, dev_id, "bool")
+        self.logger.info("total de registros: " + str(count))
+        self.assertTrue(count == 1, "** FAILED ASSERTION: received an unexpected count **")
+        self.logger.info("waiting for flows...")
+        time.sleep(10)  # waiting for flow
 
         dev_id = Api.get_deviceid_by_label(jwt, "dispositivo")
         dev_topic = "admin:" + dev_id + "/attrs"
         dev = MQTTClient(dev_id)
         self.logger.info("publicando com dispositivo: " + dev_id)
         dev.publish(dev_topic, {"bool": True})
-
-        time.sleep(5)
+        self.logger.info("waiting for flows...")
+        time.sleep(10)  # waiting for flow
+        rc, count = get_history_count_attr(self, jwt, dev_id, "bool")
+        self.logger.info("total de registros: " + str(count))
+        self.assertTrue(count == 1, "** FAILED ASSERTION: received an unexpected count **")
 
         dev_id = Api.get_deviceid_by_label(jwt, "Pluviometro")
 
@@ -2799,6 +2848,10 @@ class SanityTest(BaseTest):
 
         time.sleep(3)
 
+        rc, count = get_history_count_attr(self, jwt, dev_id, "chuva")
+        self.logger.info("total de registros: " + str(count))
+        self.assertTrue(count == 3, "** FAILED ASSERTION: received an unexpected count **")
+
         dev_id = Api.get_deviceid_by_label(jwt, "SensorNivel")
         dev_topic = "admin:" + dev_id + "/attrs"
         dev = MQTTClient(dev_id)
@@ -2815,13 +2868,18 @@ class SanityTest(BaseTest):
 
         time.sleep(3)
 
+        rc, count = get_history_count_attr(self, jwt, dev_id, "nivel")
+        self.assertTrue(count == 3, "** FAILED ASSERTION: received an unexpected count **")
+        self.logger.info("total de registros: " + str(count))
+
+
         dev_id = Api.get_deviceid_by_label(jwt, "device")
         dev_topic = "admin:" + dev_id + "/attrs"
         dev = MQTTClient(dev_id)
         self.logger.info("publicando com dispositivo: " + dev_id)
         dev.publish(dev_topic, {"int": 1})
 
-        time.sleep(2)
+        time.sleep(3)
 
         dev_id = Api.get_deviceid_by_label(jwt, "Camera1")
         dev_topic = "admin:" + dev_id + "/attrs"
@@ -2831,7 +2889,12 @@ class SanityTest(BaseTest):
         blob_data = bytearray(file_t.read())
         dev.publish(dev_topic, blob_data)
 
+        self.logger.info("waiting for flows...")
         time.sleep(10)
+
+        rc, count = get_history_count_attr(self, jwt, dev_id, "band")
+        self.assertTrue(count == 1, "** FAILED ASSERTION: received an unexpected count **")
+        self.logger.info("total de registros: " + str(count))
         
         dev_id = Api.get_deviceid_by_label(jwt, "CameraQualcomm")
         dev_topic = "admin:" + dev_id + "/attrs"
@@ -2841,7 +2904,12 @@ class SanityTest(BaseTest):
         blob_data = bytearray(file_t.read())
         dev.publish(dev_topic, blob_data)
 
+        self.logger.info("waiting for flows...")
         time.sleep(10)
+
+        rc, count = get_history_count_attr(self, jwt, dev_id, "band")
+        self.assertTrue(count == 1, "** FAILED ASSERTION: received an unexpected count **")
+        self.logger.info("total de registros: " + str(count))
 
         dev_id = Api.get_deviceid_by_label(jwt, "acesso")
         dev_topic = "admin:" + dev_id + "/attrs"
@@ -2849,7 +2917,11 @@ class SanityTest(BaseTest):
         self.logger.info("publicando com dispositivo: " + dev_id)
         dev.publish(dev_topic, {"username": "admin", "passwd": "admin"})
 
-        time.sleep(2)
+        time.sleep(3)
+
+        rc, count = get_history_count_attr(self, jwt, dev_id, "username")
+        self.assertTrue(count == 1, "** FAILED ASSERTION: received an unexpected count **")
+        self.logger.info("total de registros: " + str(count))
 
         dev_id = Api.get_deviceid_by_label(jwt, "linha_2")
         dev_topic = "admin:" + dev_id + "/attrs"
@@ -2857,43 +2929,155 @@ class SanityTest(BaseTest):
         self.logger.info("publicando com dispositivo: " + dev_id)
         dev.publish(dev_topic, {"velocidade": 60})
 
-        time.sleep(2)
+        time.sleep(3)
 
-        dev_id = Api.get_deviceid_by_label(jwt, "device")
-        dev_topic = "admin:" + dev_id + "/attrs"
-        dev = MQTTClient(dev_id)
-        self.logger.info("publicando com dispositivo: " + dev_id)
-        dev.publish(dev_topic, {"int": 2})
+        rc, count = get_history_count_attr(self, jwt, dev_id, "velocidade")
+        self.assertTrue(count == 1, "** FAILED ASSERTION: received an unexpected count **")
+        self.logger.info("total de registros: " + str(count))
 
-        time.sleep(2)
+        time.sleep(3)
 
         dev_id = Api.get_deviceid_by_label(jwt, "higrometro")
         dev_topic = "admin:" + dev_id + "/attrs"
         dev = MQTTClient(dev_id)
         self.logger.info("publicando com dispositivo: " + dev_id)
-        dev.publish(dev_topic, {"umidade": 12})
+        dev.publish(dev_topic, {"umidade": 21})
 
-        time.sleep(2)
+        time.sleep(3)
+
+        rc, count = get_history_count_attr(self, jwt, dev_id, "umidade")
+        self.logger.info("total de registros: " + str(count))
+        self.assertTrue(count == 2, "** FAILED ASSERTION: received an unexpected count **")
 
         # create device linha_4
-        Api.create_device(jwt, [template_ids[5]], "linha_4")
         self.logger.info('creating device linha_4...')
         rc, res = Api.create_device(jwt, [template_ids[5]], "linha_4")
         self.logger.info('Result: ' + str(res))
-        #self.assertTrue(int(rc) == 200, "codigo inesperado")
+        self.assertTrue(int(rc) == 200, "codigo inesperado")
+
+        time.sleep(3)
 
         # update device linha_4
-        device_id = Api.get_deviceid_by_label(jwt, "linha_4")
-        self.logger.info('updating device linha_4...' + str(device_id))
+        dev_id = Api.get_deviceid_by_label(jwt, "linha_4")
+        self.logger.info('updating device linha_4...' + str(dev_id))
         data = {"templates": [template_ids[5]], "label": "update_linha_4"}
-        rc, res = Api.update_device(jwt, str(device_id), json.dumps(data))
+        rc, res = Api.update_device(jwt, str(dev_id), json.dumps(data))
         self.logger.info('Result: ' + str(res))
-        # self.assertTrue(int(rc) == 200, "codigo inesperado")
+        self.assertTrue(int(rc) == 200, "codigo inesperado")
 
         # delete device linha_4
         device_id = Api.get_deviceid_by_label(jwt, "update_linha_4")
-        self.logger.info('removing device linha_4...')
+        self.logger.info('removing device update_linha_4...')
         rc, res = Api.delete_device(jwt, str(device_id))
         self.logger.info('Result: ' + str(res))
-        #self.assertTrue(int(rc) == 200, "codigo inesperado")
+        self.assertTrue(int(rc) == 200, "codigo inesperado")
+
+        # validações
+        self.logger.info("waiting for flows...")
+        time.sleep(15)  # waiting for flow
+
+        # check flows result
+
+        dev_id = Api.get_deviceid_by_label(jwt, "instrumento de medicao")
+        rc, count = get_history_count_attr(self, jwt, dev_id, "umidade")
+        self.assertTrue(count == 2, "** FAILED ASSERTION: received an unexpected count **")
+        self.logger.info("total de registros: " + str(count))
+        rc, count = get_history_count_attr(self, jwt, dev_id, "pressao")
+        self.assertTrue(count == 1, "** FAILED ASSERTION: received an unexpected count **")
+        self.logger.info("total de registros: " + str(count))
+        rc, count = get_history_count_attr(self, jwt, dev_id, "temperatura")
+        self.assertTrue(count == 1, "** FAILED ASSERTION: received an unexpected count **")
+        self.logger.info("total de registros: " + str(count))
+        rc, count = get_history_count_attr(self, jwt, dev_id, "velocidade")
+        self.assertTrue(count == 1, "** FAILED ASSERTION: received an unexpected count **")
+        self.logger.info("total de registros: " + str(count))
+
+        dev_id = Api.get_deviceid_by_label(jwt, "controle")
+        rc, count = get_history_count_attr(self, jwt, dev_id, "medida")
+        self.assertTrue(count == 3, "** FAILED ASSERTION: received an unexpected count **")
+        self.logger.info("total de registros: " + str(count))
+        rc, count = get_history_count_attr(self, jwt, dev_id, "mensagem")
+        self.assertTrue(count == 6, "** FAILED ASSERTION: received an unexpected count **")
+        self.logger.info("total de registros: " + str(count))
+
+        dev_id = Api.get_deviceid_by_label(jwt, "logger")
+        rc, count = get_history_count_attr(self, jwt, dev_id, "data")
+        self.assertTrue(count == 8, "** FAILED ASSERTION: received an unexpected count **")
+        self.logger.info("total de registros: " + str(count))
+
+        dev_id = Api.get_deviceid_by_label(jwt, "termometro Kelvin")
+        # check publication in history
+        rc, res = get_history_last_attr(self, jwt, dev_id, "temperatura")
+        self.assertTrue(rc == 200, "** FAILED ASSERTION: received an unexpected result code: " + str(rc) + " **")
+        self.assertTrue(res["value"] == 303.15, "** FAILED ASSERTION: received an unexpected message: " +
+                        str(res["value"]) + " **")
+
+        dev_id = Api.get_deviceid_by_label(jwt, "token")
+        rc, count = get_history_count_attr(self, jwt, dev_id, "json")
+        self.assertTrue(count == 1, "** FAILED ASSERTION: received an unexpected count **")
+        self.logger.info("total de registros: " + str(count))
+        rc, count = get_history_count_attr(self, jwt, dev_id, "jwt")
+        self.assertTrue(count == 1, "** FAILED ASSERTION: received an unexpected count **")
+        self.logger.info("total de registros: " + str(count))
+
+        dev_id = Api.get_deviceid_by_label(jwt, "device")
+        rc, count = get_history_count_attr(self, jwt, dev_id, "str")
+        self.logger.info("total de registros: " + str(count))
+        self.assertTrue(count == 2, "** FAILED ASSERTION: received an unexpected count **")
+        rc, count = get_history_count_attr(self, jwt, dev_id, "mensagem")
+        self.logger.info("total de registros: " + str(count))
+        self.assertTrue(count >= 2, "** FAILED ASSERTION: received an unexpected count **")
+
+        dev_id = Api.get_deviceid_by_label(jwt, "dispositivo")
+        rc, count = get_history_count_attr(self, jwt, dev_id, "mensagem")
+        self.logger.info("total de registros: " + str(count))
+        self.assertTrue(count != 0, "** FAILED ASSERTION: received an unexpected count **")
+
+        rc, count = get_count_profiles(self, jwt)
+        self.logger.info("total de registros: " + str(count))
+        self.assertTrue(count == 3, "** FAILED ASSERTION: received an unexpected count **")
+
+        rc, count = get_count_users(self, jwt)
+        self.logger.info("total de registros: " + str(count))
+        self.assertTrue(count == 3, "** FAILED ASSERTION: received an unexpected count **")
+
+        dev_id = Api.get_deviceid_by_label(jwt, "Pluviometro")
+
+        # check publication in influxdb
+
+        rc, count = get_retriever_count_attr(self, jwt, dev_id, "chuva")
+        self.logger.info("total de registros: " + str(count))
+        self.assertTrue(count == 3, "** FAILED ASSERTION: received an unexpected count **")
+
+        rc, count = get_history_count_notifications(self, jwt)
+        self.logger.info("total de registros: " + str(count))
+        self.assertTrue(count == 8, "** FAILED ASSERTION: received an unexpected count **")
+
+        #removendo crontab
+
+        dev_id = Api.get_deviceid_by_label(jwt, "dispositivo")
+        dev_topic = "admin:" + dev_id + "/attrs"
+        dev = MQTTClient(dev_id)
+        self.logger.info("publicando com dispositivo: " + dev_id)
+        dev.publish(dev_topic, {"bool": False})
+
+        time.sleep(3)
+        rc, res = get_history_last_attr(self, jwt, dev_id, "bool")
+        self.assertTrue(rc == 200, "** FAILED ASSERTION: received an unexpected result code: " + str(rc) + " **")
+        self.assertTrue(res["value"] == False, "** FAILED ASSERTION: received an unexpected message: " +
+                        str(res["value"]) + " **")
+
+        dev_id = Api.get_deviceid_by_label(jwt, "device")
+        dev_topic = "admin:" + dev_id + "/attrs"
+        dev = MQTTClient(dev_id)
+        self.logger.info("publicando com dispositivo: " + dev_id)
+        dev.publish(dev_topic, {"bool": False})
+
+        time.sleep(3)
+        rc, res = get_history_last_attr(self, jwt, dev_id, "bool")
+        self.assertTrue(rc == 200, "** FAILED ASSERTION: received an unexpected result code: " + str(rc) + " **")
+        self.assertTrue(res["value"] == False, "** FAILED ASSERTION: received an unexpected message: " +
+                        str(res["value"]) + " **")
+
+
 

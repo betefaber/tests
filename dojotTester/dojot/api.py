@@ -875,10 +875,6 @@ class DojotAPI:
         if isinstance(data, dict):
             data = json.dumps(data)
 
-        data = json.dumps({
-            "csr": data
-        })
-
         args = {
             "url": "{0}/x509/v1/certificates".format(CONFIG['dojot']['url']),
             "headers": {
@@ -1345,8 +1341,135 @@ class DojotAPI:
 
         result_code, res = DojotAPI.call_api(requests.post, args)
 
-        LOGGER.debug("... data imported")
+        LOGGER.debug("... data imported. Result code: " + str(result_code))
+
         return result_code, res
+
+    @staticmethod
+    def get_history_notifications(jwt: str) -> tuple:
+        """
+        Retrieves notifications.
+
+        Parameters:
+            jwt: Dojot JWT token
+
+        """
+        LOGGER.debug("Retrieving notifications...")
+
+        url = "{0}/history/notifications/history?limit=25".format(CONFIG['dojot']['url'])
+
+        args = {
+            "url": url,
+            "headers": {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer {0}".format(jwt),
+                }
+            }
+
+        rc, res = DojotAPI.call_api(requests.get, args)
+
+        LOGGER.debug("... retrieved notifications")
+
+        return rc, res
+
+    @staticmethod
+    def get_users(jwt: str) -> tuple:
+        """
+        Retrieves users.
+
+        Parameters:
+            jwt: Dojot JWT token
+
+        """
+        LOGGER.debug("Retrieving users...")
+
+        url = "{0}/auth/user".format(CONFIG['dojot']['url'])
+
+        args = {
+            "url": url,
+            "headers": {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer {0}".format(jwt),
+                }
+            }
+
+        rc, res = DojotAPI.call_api(requests.get, args)
+
+        LOGGER.debug("... retrieved users")
+
+        return rc, res
+
+    @staticmethod
+    def get_profiles(jwt: str) -> tuple:
+        """
+        Retrieves profiles.
+
+        Parameters:
+            jwt: Dojot JWT token
+
+        """
+        LOGGER.debug("Retrieving profiles...")
+
+        url = "{0}/auth/pap/group".format(CONFIG['dojot']['url'])
+
+        args = {
+            "url": url,
+            "headers": {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer {0}".format(jwt),
+                }
+            }
+
+        rc, res = DojotAPI.call_api(requests.get, args)
+        LOGGER.debug("... retrieved profiles")
+
+        return rc, res
+
+    @staticmethod
+    def get_retriever_device_attr(jwt: str, device_id: str, attr: str, datefrom: str = None, dateto: str = None,
+                           limit: int = None, order: str = None) -> tuple:
+        """
+        Retrieves device attribute data stored in influxbd
+
+        Parameters:
+            jwt: Dojot JWT token
+            device_id: Dojot device id
+            attr: Device attribute to be requested.
+            datefrom: Start time of a time-based query
+            dateto: End time of a time-based query
+            limit: Number of the most current values. If order = asc, it is the number of oldest values. You can use limit with or without dateFrom/dateTo.
+
+            """
+        LOGGER.debug("Retrieving data stored in influxbd ...")
+
+        # /tss/v1/devices/{device_id}/attrs/{attr}/data?limit={limit}&order={order}&dateFrom={dateFrom}&dateTo={dateTo}
+        url = "{0}/tss/v1/devices/{1}/attrs/{2}/data?".format(CONFIG['dojot']['url'], device_id, attr)
+
+        if limit is not None:
+            url = url + "limit=" + str(limit) + "&"
+
+        if order is not None:
+            url = url + "order=" + str(order) + "&"
+
+        if datefrom is not None:
+            url = url + "dateFrom=" + datefrom + "&"
+
+        if dateto is not None:
+            url = url + "dateTo=" + dateto + "&"
+
+        args = {
+            "url": url,
+            "headers": {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer {0}".format(jwt),
+            }
+        }
+
+        rc, res = DojotAPI.call_api(requests.get, args)
+
+        LOGGER.debug("... retrieved data")
+
+        return rc, res
 
     @staticmethod
     def divide_loads(total: int, batch: int) -> List:

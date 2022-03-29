@@ -45,6 +45,7 @@ def add_a_simple_template(self, jwt: str, label="SimpleTemplate"):
 
 def get_history_count_attr_value(self, jwt: str, dev_id: str, attr: str, value: str) -> tuple:
     rc, res = Api.get_history_device(jwt, dev_id, attr)
+    self.logger.info("history: " + str(res))
 
     # No data for the given attribute
     if rc == 404 and res["description"] == "No data for the given attribute could be found":
@@ -62,6 +63,7 @@ def get_history_count_attr_value(self, jwt: str, dev_id: str, attr: str, value: 
 
 def get_history_count_attr(self, jwt: str, dev_id: str, attr: str) -> tuple:
     rc, res = Api.get_history_device(jwt, dev_id, attr)
+    self.logger.info("history: " + str(res))
 
     # No data for the given attribute
     if rc == 404 and res["description"] == "No data for the given attribute could be found":
@@ -95,6 +97,49 @@ def get_history_last_attr(self, jwt: str, dev_id: str, attr: str) -> tuple:
 
     return rc, res[0]
 
+def get_history_count_notifications(self, jwt: str) -> tuple:
+    rc, res = Api.get_history_notifications(jwt)
+    self.logger.info("Retrieving notifications: " + str(res))
+
+    self.assertTrue(rc == 200, "** FAILED ASSERTION: failure to retrieve notifications **")
+
+    response = res["notifications"]
+    self.logger.info("notifications: " + str(response))
+
+    return rc, len(response)
+
+def get_count_users(self, jwt: str) -> tuple:
+    rc, res = Api.get_users(jwt)
+    self.logger.info("Retrieving users: " + str(res))
+
+    self.assertTrue(rc == 200, "** FAILED ASSERTION: failure to retrieve notifications **")
+
+    response = res["users"]
+    self.logger.info("users: " + str(response))
+
+    return rc, len(response)
+
+def get_count_profiles(self, jwt: str) -> tuple:
+    rc, res = Api.get_profiles(jwt)
+    self.logger.info("Retrieving profiles: " + str(res))
+
+    self.assertTrue(rc == 200, "** FAILED ASSERTION: failure to retrieve notifications **")
+
+    response = res["groups"]
+    self.logger.info("profiles: " + str(response))
+
+    return rc, len(response)
+
+def get_retriever_count_attr(self, jwt: str, dev_id: str, attr: str) -> tuple:
+    rc, res = Api.get_retriever_device_attr(jwt, dev_id, attr)
+
+    # return empty if no data for the given attribute
+    response = res["data"]
+
+    self.logger.info("response: " + str(response))
+    self.assertTrue(rc == 200, "** FAILED ASSERTION: failure to get history from device" + dev_id + " **")
+
+    return rc, len(response)
 
 def create_a_device_and_its_certificate(self, jwt: str):
 
