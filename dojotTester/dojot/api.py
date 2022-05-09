@@ -1316,6 +1316,25 @@ class DojotAPI:
         return result_code, res
 
     @staticmethod
+    def remove_remote_nodes(jwt: str) -> tuple:
+        """
+        Remove all remote nodes
+        """
+        LOGGER.debug("Removing all remote nodes...")
+
+        args = {
+            "url": "{0}/flows/v1/node".format(CONFIG['dojot']['url']),
+            "headers": {
+                "Authorization": "Bearer {0}".format(jwt),
+            }
+        }
+
+        rc, res = DojotAPI.call_api(requests.delete, args)
+
+        LOGGER.debug("... deleted remote nodes")
+        return rc, res
+
+    @staticmethod
     def import_data(jwt: str, data: dict) -> tuple:
         """
         Import a database in Dojot.
