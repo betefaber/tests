@@ -2688,138 +2688,6 @@ class SanityTest(BaseTest):
 
         # publicações
 
-        #Device - linha_1
-        '''
-        dev_id = Api.get_deviceid_by_label(jwt, "linha_1")
-        dev_topic = "admin:" + dev_id + "/attrs"
-        dev = MQTTClient(dev_id)
-        self.logger.info("publicando com dispositivo: " + dev_id + ", linha_1")
-        rc = dev.publish(dev_topic,
-                     {"gps":"-22.890970, -47.063006","velocidade":50,"passageiros":30,"operacional":False})
-        self.logger.info("rc: " + str(rc))
-        self.assertTrue(rc == 0, "** FAILED ASSERTION: received an unexpected result code: " + str(rc) + " **")
-
-        time.sleep(10)
-        dev.publish(dev_topic,
-                     {"gps":"-22.893619, -47.052921","velocidade":40,"passageiros":45,"operacional":True})
-
-        self.logger.info("waiting for flows...")
-        time.sleep(15)  # waiting for flow
-        # check publication in history
-        rc, res = get_history_last_attr(self, jwt, dev_id, "velocidade")
-        self.assertTrue(rc == 200, "** FAILED ASSERTION: received an unexpected result code: " + str(rc) + " **")
-        self.assertTrue(res["value"] == 50, "** FAILED ASSERTION: received an unexpected message: " +
-                        str(res["value"]) + " **")
-        # check flow result
-        rc, res = get_history_last_attr(self, jwt, dev_id, "letreiro")
-        self.assertTrue(rc == 200, "** FAILED ASSERTION: received an unexpected result code: " + str(rc) + " **")
-        self.assertTrue(res["value"] == "JARDIM PAULISTA", "** FAILED ASSERTION: received an unexpected message: " +
-                        res["value"] + " **")
-
-        rc, res = get_history_last_attr(self, jwt, dev_id, "mensagem")
-        self.assertTrue(rc == 200, "** FAILED ASSERTION: received an unexpected result code: " + str(rc) + " **")
-        self.assertTrue(res["value"] == "Não está no Cambuí", "** FAILED ASSERTION: received an unexpected message: " +
-                        res["value"] + " **")
-
-        dev.publish(dev_topic,
-                    {"gps":"-22.893619, -47.052921","velocidade":40,"passageiros":45,"operacional":True})
-        self.logger.info("waiting for flows...")
-        
-        time.sleep(10)
-        rc, res = get_history_last_attr(self, jwt, dev_id, "letreiro")
-        #self.assertTrue(rc == 200, "** FAILED ASSERTION: received an unexpected result code **")
-        self.assertTrue(res["value"] == "LOTADO", "** FAILED ASSERTION: received an unexpected message: " +
-                        res["value"] + " **")
-
-        rc, res = get_history_last_attr(self, jwt, dev_id, "mensagem")
-        self.assertTrue(rc == 200, "** FAILED ASSERTION: received an unexpected result code: " + str(rc) + " **")
-        self.assertTrue(res["value"] == "Está no Cambuí", "** FAILED ASSERTION: received an unexpected message: " +
-                        res["value"] + " **")
-
-        rc, count = get_history_count_attr_value(self, jwt, dev_id, "letreiro", "LOTADO")
-        self.assertTrue(count == 1, "** FAILED ASSERTION: received an unexpected count **")
-
-        rc, count = get_history_count_attr(self, jwt, dev_id, "mensagem")
-        self.assertTrue(count == 2, "** FAILED ASSERTION: received an unexpected count **")
-        self.logger.info("total de registros: " + str(count))
-        
-        dev_id = Api.get_deviceid_by_label(jwt, "dispositivo")
-        dev_topic = "admin:" + dev_id + "/attrs"
-        dev = MQTTClient(dev_id)
-        self.logger.info("publicando com dispositivo: " + dev_id + ", dispositivo")
-        dev.publish(dev_topic, {"int": 2})
-
-        time.sleep(10)
-        
-        rc, count = get_history_count_attr(self, jwt, dev_id, "int")
-        self.assertTrue(count == 1, "** FAILED ASSERTION: received an unexpected count **")
-        self.logger.info("total de registros: " + str(count))
- 
-        dev_id = Api.get_deviceid_by_label(jwt, "anemometro")
-        dev_topic = "admin:" + dev_id + "/attrs"
-        dev = MQTTClient(dev_id)
-        self.logger.info("publicando com dispositivo: " + dev_id + ", anemometro")
-        dev.publish(dev_topic, {"velocidade": 50})
-
-        time.sleep(3)
-
-        rc, count = get_history_count_attr(self, jwt, dev_id, "velocidade")
-        self.assertTrue(count == 1, "** FAILED ASSERTION: received an unexpected count **")
-        self.logger.info("total de registros: " + str(count))
-
-        dev_id = Api.get_deviceid_by_label(jwt, "barometro")
-        dev_topic = "admin:" + dev_id + "/attrs"
-        dev = MQTTClient(dev_id)
-        self.logger.info("publicando com dispositivo: " + dev_id + ", barometro")
-        dev.publish(dev_topic, {"pressao": 0.9})
-
-        time.sleep(3)
-
-        rc, count = get_history_count_attr(self, jwt, dev_id, "pressao")
-        self.assertTrue(count == 1, "** FAILED ASSERTION: received an unexpected count **")
-        self.logger.info("total de registros: " + str(count))
-
-        dev_id = Api.get_deviceid_by_label(jwt, "higrometro")
-        dev_topic = "admin:" + dev_id + "/attrs"
-        dev = MQTTClient(dev_id)
-        self.logger.info("publicando com dispositivo: " + dev_id + ", higrometro")
-        dev.publish(dev_topic, {"umidade": 15})
-
-        time.sleep(3)
-
-        rc, count = get_history_count_attr(self, jwt, dev_id, "umidade")
-        self.assertTrue(count == 1, "** FAILED ASSERTION: received an unexpected count **")
-        self.logger.info("total de registros: " + str(count))
-
-        time.sleep(3)
-
-
-        dev_id = Api.get_deviceid_by_label(jwt, "device")
-        rc, res = get_history_first_attr(self, jwt, dev_id, "mensagem")
-        self.assertTrue(rc == 200, "** FAILED ASSERTION: received an unexpected result code: " + str(rc) + " **")
-        self.logger.info("device_id: " + str(dev_id) + ", mensagem: " + str(res))
-
-        self.assertTrue(res["value"] == "baixa umidade relativa do ar: 15 !", "** FAILED ASSERTION: received an unexpected message: " +
-                        str(res["value"]) + " **")
-
-        dev_id = Api.get_deviceid_by_label(jwt, "termometro Celsius")
-        dev_topic = "admin:" + dev_id + "/attrs"
-        dev = MQTTClient(dev_id)
-        self.logger.info("publicando com dispositivo: " + dev_id + ", termometro Celsius")
-        dev.publish(dev_topic, {"temperatura": 30})
-
-        time.sleep(3)
-
-        rc, count = get_history_count_attr(self, jwt, dev_id, "temperatura")
-        self.assertTrue(count == 1, "** FAILED ASSERTION: received an unexpected count **")
-        self.logger.info("total de registros: " + str(count))
-        '''
-
-        # REFATORAÇÃO
-
-
-        # publicações
-
         dev_id = Api.get_deviceid_by_label(jwt, "linha_1")
         dev_topic = "admin:" + dev_id + "/attrs"
         dev = MQTTClient(dev_id)
@@ -2942,6 +2810,8 @@ class SanityTest(BaseTest):
         ###################
         # check publication in history
         ###################
+
+        self.logger.info("validating the expected results...")
 
         self.logger.info("waiting for flows...")
         time.sleep(15)  # waiting for flow
