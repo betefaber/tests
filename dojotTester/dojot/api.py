@@ -1491,6 +1491,188 @@ class DojotAPI:
         return rc, res
 
     @staticmethod
+    def get_credentials_without_body(jwt: str, content: None or str) -> tuple:
+        """
+        Request a credentials with parameters's default values.
+        Returns the credentials or a error message.
+        """
+        LOGGER.debug("Requesting credentials...")
+
+        if content is None:
+            content = "application/json"
+
+        args = {
+            "url": "{0}/api/v1/credentials".format(CONFIG['dojot']['url']),
+            "headers": {
+                "Content-Type": "{0}".format(content),
+                "Authorization": "Bearer {0}".format(jwt),
+            }
+        }
+
+        result_code, res = DojotAPI.call_api(requests.post, args)
+
+        LOGGER.debug("... retrieved the credentials")
+
+        return result_code, res
+
+    @staticmethod
+    def get_credentials(jwt: str, data: dict) -> tuple:
+        """
+        Request a credentials.
+        Returns the credentials or a error message.
+        """
+        LOGGER.debug("Requesting credentials...")
+
+        if isinstance(data, dict):
+            data = json.dumps(data)
+
+        args = {
+            "url": "{0}/api/v1/credentials".format(CONFIG['dojot']['url']),
+            "headers": {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer {0}".format(jwt),
+            },
+            "data": data,
+        }
+
+        result_code, res = DojotAPI.call_api(requests.post, args)
+
+        LOGGER.debug("... retrieved the credentials")
+
+        return result_code, res
+
+
+    @staticmethod
+    def upload_file(jwt: str, filePath: str, path: str) -> tuple:
+        """
+        Returns the uploaded file or a error message.
+        """
+        LOGGER.debug("Uploading file...")
+
+        # setting url
+
+        url = "{0}/file-mgmt/api/v1/files/upload".format(CONFIG['dojot']['url'])
+
+
+        # setting args
+
+
+        args = {
+            "url": url,
+            "headers": {
+                "Authorization": "Bearer {0}".format(jwt)
+            },
+            "files": {'file': open(filePath, 'rb')},
+            "data": {
+                "path": path
+            }
+        }
+
+
+        LOGGER.debug("sending request...")
+        result_code, res = DojotAPI.call_api(requests.put, args)
+
+
+        LOGGER.debug("...done ")
+        return result_code, res
+
+    @staticmethod
+    def list_stored_files(jwt: str, limit: int) -> tuple:
+        """
+        Returns the uploaded file or a error message.
+        """
+        LOGGER.debug("Listing stored files...")
+
+        # setting url
+
+        url = "{0}/file-mgmt/api/v1/files/list?limit={1}".format(CONFIG['dojot']['url'], limit)
+
+
+        # setting args
+
+
+        args = {
+            "url": url,
+            "headers": {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer {0}".format(jwt)
+            }
+        }
+
+
+        LOGGER.debug("sending request...")
+        result_code, res = DojotAPI.call_api(requests.get, args)
+
+
+        LOGGER.debug("...done ")
+        return result_code, res
+
+    @staticmethod
+    def remove_stored_file(jwt: str, path: str) -> tuple:
+        """
+
+        """
+        LOGGER.debug("Removing file...")
+
+        # setting url
+
+        url = "{0}/file-mgmt/api/v1/files/remove?path={1}".format(CONFIG['dojot']['url'], path)
+
+        # setting args
+
+        args = {
+            "url": url,
+            "headers": {
+                "Authorization": "Bearer {0}".format(jwt)
+            }
+        }
+
+        LOGGER.debug("sending request...")
+        result_code, res = DojotAPI.call_api(requests.delete, args)
+
+        LOGGER.debug("...done ")
+        return result_code, res
+
+    @staticmethod
+    def download_file(jwt: str, filename: str, path: str) -> int:
+        """
+        Returns the downloaded file or a error message.
+        """
+        LOGGER.debug("Downloading file...")
+
+        # setting url
+
+        url = "{0}/file-mgmt/api/v1/files/download".format(CONFIG['dojot']['url'])
+
+
+        # setting args
+
+        args = {
+            "url": url,
+            "headers": {
+                "Authorization": "Bearer {0}".format(jwt),
+                "accept": "Any"
+            },
+            "data": {
+                "alt": "media",
+                "path": path
+            }
+        }
+
+
+        LOGGER.debug("sending request...")
+#        rc, res = DojotAPI.call_api(requests.get, args)
+        response = requests.get(url, params={"alt": "media", "path": path}, headers={"Authorization": "Bearer {0}".format(jwt), "accept": "Any"})
+        open(filename, 'wb').write(response.content)
+
+
+
+        LOGGER.debug("...done ")
+        return response.status_code
+#        return rc, res
+
+
+    @staticmethod
     def divide_loads(total: int, batch: int) -> List:
         """
         Divides `n` in a list with each element being up to `batch`.
