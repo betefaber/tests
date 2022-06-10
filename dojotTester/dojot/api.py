@@ -875,6 +875,11 @@ class DojotAPI:
         if isinstance(data, dict):
             data = json.dumps(data)
 
+        if isinstance(data, str):
+            data = json.dumps({
+                "csr": data
+            })
+
         args = {
             "url": "{0}/x509/v1/certificates".format(CONFIG['dojot']['url']),
             "headers": {
@@ -1403,6 +1408,33 @@ class DojotAPI:
         LOGGER.debug("Retrieving users...")
 
         url = "{0}/auth/user".format(CONFIG['dojot']['url'])
+
+        args = {
+            "url": url,
+            "headers": {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer {0}".format(jwt),
+                }
+            }
+
+        rc, res = DojotAPI.call_api(requests.get, args)
+
+        LOGGER.debug("... retrieved users")
+
+        return rc, res
+
+    @staticmethod
+    def get_tenants(jwt: str) -> tuple:
+        """
+        Retrieves tenants.
+
+        Parameters:
+            jwt: Dojot JWT token
+
+        """
+        LOGGER.debug("Retrieving tenants...")
+
+        url = "{0}/auth/admin/tenants".format(CONFIG['dojot']['url'])
 
         args = {
             "url": url,

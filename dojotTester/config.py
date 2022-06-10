@@ -18,7 +18,7 @@ CONFIG = {
         'host': os.environ.get("DOJOT_MQTT_HOST", "localhost"),
         'port': int(os.environ.get("DOJOT_MQTT_PORT", 1883)),
         'con_timeout': int(os.environ.get("DOJOT_MQTT_TIMEOUT", 120)),
-        'qos': int(os.environ.get("DOJOT_MQTT_QOS", 1)),
+        'qos': int(os.environ.get("DOJOT_MQTT_QOS", 0)),
     },
 
     'http': {
@@ -38,6 +38,6 @@ CONFIG = {
         }
     },
     'log': {
-        'level': os.environ.get("LOG_LEVEL", "debug")
+        'level': os.environ.get("LOG_LEVEL", "info")
     }
 }

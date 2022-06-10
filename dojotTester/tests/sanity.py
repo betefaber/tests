@@ -1,11 +1,16 @@
-from common.base_test import BaseTest
 from dojot.api import DojotAPI as Api
 from mqtt.mqttClient import MQTTClient
 import json
 import random
+import datetime
 import time
-from common.testutils import *
+
 from dojotTester import ROOT_DIR
+
+from common.testutils import *
+from common.certUtils import *
+from common.base_test import BaseTest
+from iotAgentHttp.httpClient import HTTPSClient
 
 
 class SanityTest(BaseTest):
@@ -63,6 +68,7 @@ class SanityTest(BaseTest):
 
     def createRemoteNode(self, jwt: str, node: dict):
 
+        self.logger.info('adding remote node..')
         rc, res = Api.create_remote_node(jwt, node)
         #self.assertTrue(int(rc) == 200, "Error on create remote node")
         return rc, res
@@ -82,15 +88,16 @@ class SanityTest(BaseTest):
         self.logger.debug('getting jwt...')
         jwt = Api.get_jwt()
 
+        self.logger.debug('importing empty database ...')
         rc, res = self.importData(jwt)
         self.assertTrue(int(rc) == 201, "codigo inesperado")
 
 
-        self.logger.debug('waiting...')
+        self.logger.info('waiting...')
         time.sleep(10)
 
         templates = []
-        self.logger.debug('creating templates...')
+        self.logger.info('creating templates...')
         templates.append({
             "label": "medidor de temperatura",
             "attrs": [
@@ -374,9 +381,10 @@ class SanityTest(BaseTest):
         })
 
         template_ids = self.createTemplates(jwt, templates)
-        self.logger.info("templates ids: " + str(template_ids))
+        self.logger.info("Templates created. IDs: " + str(template_ids))
 
         devices = []
+        self.logger.info('creating devices...')
         devices.append(([template_ids[0], template_ids[4]], "termometro Celsius"))
         devices.append(([template_ids[0], template_ids[4]], "termometro Kelvin"))
         devices.append(([template_ids[1], template_ids[4]], "barometro"))
@@ -398,12 +406,13 @@ class SanityTest(BaseTest):
         devices.append(([template_ids[14]], "CameraQualcomm"))
 
         devices_ids = self.createDevices(jwt, devices)
-        self.logger.info("devices ids: " + str(devices_ids))
+        self.logger.info("Devices created. IDs: " + str(devices_ids))
 
         ###################
         #Configuring flows
         ###################
         flows = []
+        self.logger.info('creating flows...')
         flows.append({
             "name": "basic flow",
             "flow": [
@@ -1875,7 +1884,7 @@ class SanityTest(BaseTest):
                   "source": "responseGET",
                   "sourceFieldType": "msg",
                   "messageDynamic": "",
-                  "messageStatic": "teste",
+                  "messageStatic": "http GET",
                   "messageFieldType": "msg",
                   "msgType": "static",
                   "x": 828.5,
@@ -2642,6 +2651,7 @@ class SanityTest(BaseTest):
 
         group1 = {"name": "viewer" + str(random.randint(0, 100)),
                   "description": "Grupo com acesso somente para visualizar as informações"}
+        self.logger.info('creating profiles...')
         rc, response = Api.create_group(jwt, group1)
         self.logger.debug(f"Group group1 creation return the result code: {rc} and response: {response}")
         self.assertTrue(int(rc) == 200, "Error on create group")
@@ -2649,8 +2659,9 @@ class SanityTest(BaseTest):
 
         self.logger.info("Groups created. IDs: " + str(group1_id))
 
-        #TODO adicionar as permissoes ao grupo
+        # adicionar as permissoes ao grupo
 
+        self.logger.info('adding permissions to the created group...')
         rc, res = Api.add_permission(jwt, group1_id, "2")
         self.logger.info("Permissions added to the group: " + str(group1_id))
         self.assertTrue(int(rc) == 200, "codigo inesperado")
@@ -2665,14 +2676,15 @@ class SanityTest(BaseTest):
 
         # adicionar usuario
 
-        user1 = {"username": "bete",
+        self.logger.info('creating users...')
+        user1 = {"username": "joao",
             "service": "teste",
-            "email": "bete@noemail.com",
-            "name": "Elisabete",
+            "email": "joao@noemail.com",
+            "name": "João",
             "profile": "admin"
             }
         self.createUsers(jwt, user1)
-        self.logger.info("User created: bete")
+        self.logger.info("User created: joao")
 
         user2 = {
             "username": "maria",
@@ -2684,7 +2696,12 @@ class SanityTest(BaseTest):
         self.createUsers(jwt, user2)
         self.logger.info("User created: maria")
 
-        # TODO listar tenants
+        # listar tenants
+
+        self.logger.info("listing tenants...")
+        rc, res = Api.get_tenants(jwt)
+        self.logger.info('Result: ' + str(res))
+        self.assertTrue(int(rc) == 200, "codigo inesperado")
 
         # publicações
 
@@ -2694,7 +2711,7 @@ class SanityTest(BaseTest):
         self.logger.info("publicando com dispositivo: " + dev_id + ", linha_1")
         rc = dev.publish(dev_topic,
                      {"gps":"-22.890970, -47.063006","velocidade":50,"passageiros":30,"operacional":False})
-        self.logger.info("rc: " + str(rc))
+        self.logger.debug("rc: " + str(rc))
         self.assertTrue(rc == 0, "** FAILED ASSERTION: received an unexpected result code: " + str(rc) + " **")
 
         self.logger.info("waiting for flows...")
@@ -2705,13 +2722,26 @@ class SanityTest(BaseTest):
 
         time.sleep(3)
 
+
+        self.logger.info("creating cron jobs - EventRequest")
         dev_id = Api.get_deviceid_by_label(jwt, "dispositivo")
         dev_topic = "admin:" + dev_id + "/attrs"
         dev = MQTTClient(dev_id)
         self.logger.info("publicando com dispositivo: " + dev_id + ", dispositivo")
         dev.publish(dev_topic, {"int": 2, "bool": True})
 
-        time.sleep(3)
+        time.sleep(5)
+
+        #ativação do cron: bool=true
+        self.logger.info("creating cron jobs - HTTPRequest...")
+
+        dev_id = Api.get_deviceid_by_label(jwt, "device")
+        dev_topic = "admin:" + dev_id + "/attrs"
+        dev = MQTTClient(dev_id)
+        self.logger.info("publicando com dispositivo: " + dev_id + ", device")
+        dev.publish(dev_topic, {"int": 1, "bool": True})
+
+        time.sleep(5)
 
         dev_id = Api.get_deviceid_by_label(jwt, "anemometro")
         dev_topic = "admin:" + dev_id + "/attrs"
@@ -2747,19 +2777,7 @@ class SanityTest(BaseTest):
         self.logger.info("publicando com dispositivo: " + dev_id + ", termometro Celsius")
         dev.publish(dev_topic, {"temperatura": 30})
 
-
         time.sleep(3)
-
-        #ativação do cron: bool=true
-        self.logger.info("ativação do cron")
-
-        dev_id = Api.get_deviceid_by_label(jwt, "device")
-        dev_topic = "admin:" + dev_id + "/attrs"
-        dev = MQTTClient(dev_id)
-        self.logger.info("publicando com dispositivo: " + dev_id + ", device")
-        dev.publish(dev_topic, {"int": 1, "bool": True})
-
-        time.sleep(5)
 
         dev_id = Api.get_deviceid_by_label(jwt, "Pluviometro")
         dev_topic = "admin:" + dev_id + "/attrs"
@@ -2811,24 +2829,26 @@ class SanityTest(BaseTest):
         # check publication in history
         ###################
 
-        self.logger.info("validating the expected results...")
+        self.logger.info("checking the results obtained in the execution of the flows...")
 
         self.logger.info("waiting for flows...")
         time.sleep(15)  # waiting for flow
 
         dev_id = Api.get_deviceid_by_label(jwt, "linha_1")
-        rc, res = get_history_last_attr(self, jwt, dev_id, "velocidade")
+        rc, count = get_history_count_attr_value(self, jwt, dev_id, "velocidade", 40)
         self.assertTrue(rc == 200, "** FAILED ASSERTION: received an unexpected result code: " + str(rc) + " **")
-        self.assertTrue(res["value"] == 40, "** FAILED ASSERTION: received an unexpected message: " +
-                        str(res["value"]) + " **")
+        self.assertTrue(count == 1, "** FAILED ASSERTION: Unexpected count value: " + str(count) + " **")
+
         time.sleep(3)
 
+        self.logger.info("flow with actuate node...")
         rc, res = get_history_last_attr(self, jwt, dev_id, "letreiro")
         self.assertTrue(rc == 200, "** FAILED ASSERTION: received an unexpected result code **")
         self.assertTrue(res["value"] == "LOTADO", "** FAILED ASSERTION: received an unexpected message: " +
                         res["value"] + " **")
         time.sleep(3)
 
+        self.logger.info("flow with geofence node...")
         rc, res = get_history_last_attr(self, jwt, dev_id, "mensagem")
         self.assertTrue(rc == 200, "** FAILED ASSERTION: received an unexpected result code: " + str(rc) + " **")
         self.assertTrue(res["value"] == "Está no Cambuí", "** FAILED ASSERTION: received an unexpected message: " +
@@ -2875,12 +2895,16 @@ class SanityTest(BaseTest):
 
 
         dev_id = Api.get_deviceid_by_label(jwt, "device")
-        rc, res = get_history_first_attr(self, jwt, dev_id, "mensagem")
-        self.assertTrue(rc == 200, "** FAILED ASSERTION: received an unexpected result code: " + str(rc) + " **")
-        self.logger.info("device_id: " + str(dev_id) + ", mensagem: " + str(res))
 
-        self.assertTrue(res["value"] == "baixa umidade relativa do ar: 15 !", "** FAILED ASSERTION: received an unexpected message: " +
-                        str(res["value"]) + " **")
+        #rc, res = get_history_first_attr(self, jwt, dev_id, "mensagem")
+        #self.assertTrue(rc == 200, "** FAILED ASSERTION: received an unexpected result code: " + str(rc) + " **")
+        #self.logger.info("device_id: " + str(dev_id) + ", mensagem: " + str(res))
+        #self.assertTrue(res["value"] == "baixa umidade relativa do ar: 15 !", "** FAILED ASSERTION: received an unexpected message: " + str(res["value"]) + " **")
+
+        rc, count = get_history_count_attr_value(self, jwt, device_id, "mensagem", "baixa umidade relativa do ar: 15 !")
+        self.logger.info("total de registros: " + str(count))
+        self.assertTrue(count == 2, "** FAILED ASSERTION: Unexpected count value")
+
         time.sleep(3)
 
         dev_id = Api.get_deviceid_by_label(jwt, "termometro Celsius")
@@ -3012,6 +3036,7 @@ class SanityTest(BaseTest):
 
         # check flows result
 
+        self.logger.info("aggregation flow result...")
         dev_id = Api.get_deviceid_by_label(jwt, "instrumento de medicao")
         rc, count = get_history_count_attr(self, jwt, dev_id, "umidade")
         self.logger.info("total de registros: " + str(count))
@@ -3031,6 +3056,7 @@ class SanityTest(BaseTest):
 
         time.sleep(3)
 
+        self.logger.info("flow with cumulative sum...")
         dev_id = Api.get_deviceid_by_label(jwt, "controle")
         rc, count = get_history_count_attr(self, jwt, dev_id, "medida")
         self.logger.info("total de registros: " + str(count))
@@ -3042,6 +3068,7 @@ class SanityTest(BaseTest):
 
         time.sleep(3)
 
+        self.logger.info("flow with merge data node...")
         dev_id = Api.get_deviceid_by_label(jwt, "logger")
         rc, count = get_history_count_attr(self, jwt, dev_id, "data")
         self.logger.info("total de registros: " + str(count))
@@ -3049,6 +3076,7 @@ class SanityTest(BaseTest):
 
         time.sleep(3)
 
+        self.logger.info("flow with remote node...")
         dev_id = Api.get_deviceid_by_label(jwt, "termometro Kelvin")
         # check publication in history
         rc, res = get_history_last_attr(self, jwt, dev_id, "temperatura")
@@ -3068,6 +3096,7 @@ class SanityTest(BaseTest):
         self.logger.info("total de registros: " + str(count))
         '''
 
+        self.logger.info("checking if cron jobs have been configured...")
         dev_id = Api.get_deviceid_by_label(jwt, "device")
         rc, count = get_history_count_attr(self, jwt, dev_id, "str")
         self.logger.info("total de registros: " + str(count))
@@ -3084,12 +3113,14 @@ class SanityTest(BaseTest):
         self.logger.info("total de registros: " + str(count))
         self.assertTrue(count != 0, "** FAILED ASSERTION: received an unexpected count **")
 
+        self.logger.info("checking if profile was created...")
         rc, count = get_count_profiles(self, jwt)
         self.logger.info("total de registros: " + str(count))
         self.assertTrue(count == 3, "** FAILED ASSERTION: received an unexpected count **")
 
         time.sleep(3)
 
+        self.logger.info("checking if users were created...")
         rc, count = get_count_users(self, jwt)
         self.logger.info("total de registros: " + str(count))
         self.assertTrue(count == 3, "** FAILED ASSERTION: received an unexpected count **")
@@ -3098,6 +3129,7 @@ class SanityTest(BaseTest):
 
         # check publication in influxdb
 
+        self.logger.info("checking if data has been stored in influxdb...")
         dev_id = Api.get_deviceid_by_label(jwt, "Pluviometro")
         rc, count = get_retriever_count_attr(self, jwt, dev_id, "chuva")
         self.logger.info("total de registros: " + str(count))
@@ -3106,13 +3138,9 @@ class SanityTest(BaseTest):
         self.logger.info("waiting for flows...")
         time.sleep(10)
 
-        rc, count = get_history_count_notifications(self, jwt)
-        self.logger.info("total de registros: " + str(count))
-        self.assertTrue(count == 8, "** FAILED ASSERTION: received an unexpected count **")
-        time.sleep(3)
-
         #removendo crontab
 
+        self.logger.info("removing cron jobs...")
         dev_id = Api.get_deviceid_by_label(jwt, "dispositivo")
         dev_topic = "admin:" + dev_id + "/attrs"
         dev = MQTTClient(dev_id)
@@ -3137,12 +3165,49 @@ class SanityTest(BaseTest):
         self.assertTrue(res["value"] == False, "** FAILED ASSERTION: received an unexpected message: " +
                         str(res["value"]) + " **")
 
+
+        self.logger.info("checking if notifications were generated...")
+        rc, count = get_history_count_notifications(self, jwt)
+        self.logger.info("total de registros: " + str(count))
+        self.assertTrue(count == 8, "** FAILED ASSERTION: received an unexpected count **")
+        time.sleep(3)
+
+
         # remove remote nodes
+        self.logger.info("removing remote nodes...")
         rc, res = Api.remove_remote_nodes(jwt)
         self.logger.info('Result: ' + str(res))
         self.assertTrue(int(rc) == 200, "codigo inesperado")
 
 
+        self.logger.info('http-agent test...')
+
+        device_id, _ = create_a_device_and_its_certificate(self, jwt)
+
+        dev1 = HTTPSClient(device_id)
+
+        payload = {"temperature": 90, 'humidity': 60}
+        publish_date = datetime.datetime.utcnow().isoformat() + "Z"
+        rc, res = dev1.publish(payload)
+        self.assertTrue(rc == 204,
+                        "** FAILED ASSERTION: Unexpected result code value: " + str(rc) + ". Body: " + str(res))
+        # waiting to process
+        time.sleep(5)
+        self.logger.info('Checking history for publication')
+        rc, count = get_history_count_attr_value(self, jwt, device_id, "temperature", 90)
+        self.assertTrue(rc == 200, "** FAILED ASSERTION: Unexpected result code: " + str(rc))
+        self.logger.info("total de registros: " + str(count) + ", " + str(device_id))
+        self.assertTrue(count == 1, "** FAILED ASSERTION: Unexpected count value")
 
 
+        self.logger.info("file-mgmt test...")
 
+        file = ROOT_DIR + "/" + "resources/files/arquivo.txt"
+
+        self.logger.info('file: ' + str(file))
+
+        path = "arquivos/arquivo.txt"
+
+        rc, res = Api.upload_file(jwt, file, path)
+        self.logger.info('Result: ' + str(res) + ', ' + str(rc))
+        self.assertTrue(int(rc) == 201, "codigo inesperado")
